@@ -93,32 +93,66 @@ let PRODUCT_CATALOG={};
 const SUPABASE_URL='https://aurwsypwnxywdaingjer.supabase.co';
 const SUPABASE_KEY='sb_publishable_qzNXia-pnW0O8P7QT7sPCw_g6Y804vF';
 const CLOUD_CUSTOMER_ID='__APP_STATE__';
-const CLOUD_DATA_TYPE='app_state';
+const CLOUD_LEGACY_DATA_TYPE='app_state';
+const CLOUD_DEVICE_PREFIX='app_state_device_';
+const CLOUD_RESET_DATA_TYPE='app_state_reset';
+const CLOUD_DEVICE_KEY='ce_sales_sync_device_id_v2';
+function getCloudDeviceId(){
+  try{
+    let id=localStorage.getItem(CLOUD_DEVICE_KEY);
+    if(!id){
+      id=(crypto?.randomUUID?crypto.randomUUID():('dev_'+Date.now()+'_'+Math.random().toString(36).slice(2)));
+      localStorage.setItem(CLOUD_DEVICE_KEY,id);
+    }
+    return id;
+  }catch{
+    return 'dev_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+  }
+}
+const CLOUD_DEVICE_DATA_TYPE=CLOUD_DEVICE_PREFIX+getCloudDeviceId();
+let cloudDeviceRowId=null;
+try{cloudDeviceRowId=Number(localStorage.getItem(CLOUD_DEVICE_KEY+'_row'))||null}catch{}
 const supabaseClient=(window.supabase&&typeof window.supabase.createClient==='function')?window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY):null;
 let cloudSyncState='not_connected';
 function setCloudState(state){cloudSyncState=state;const el=document.getElementById('cloudSyncState');if(el){const map={synced:'☁️ Cloud: Synced',syncing:'☁️ Cloud: Syncing…',error:'☁️ Cloud: Error',not_connected:'☁️ Cloud: Not connected'};el.textContent=map[state]||map.not_connected;el.style.color=state==='synced'?'#15803d':state==='error'?'#b91c1c':'';}}
 async function cloudRead(){
  if(!supabaseClient)throw new Error('Supabase library မတင်နိုင်ပါ');
- const {data,error}=await supabaseClient.from('app_data').select('id,customer_id,data_type,payload').eq('customer_id',CLOUD_CUSTOMER_ID).eq('data_type',CLOUD_DATA_TYPE).order('id',{ascending:false}).limit(1);
- if(error)throw error;
- const row=data?.[0];
- if(!row)return null;
- return normalizeDb(row.payload);
+ const [legacyRes,deviceRes,resetRes]=await Promise.all([
+   supabaseClient.from('app_data').select('id,customer_id,data_type,payload').eq('customer_id',CLOUD_CUSTOMER_ID).eq('data_type',CLOUD_LEGACY_DATA_TYPE).order('id',{ascending:true}),
+   supabaseClient.from('app_data').select('id,customer_id,data_type,payload').eq('customer_id',CLOUD_CUSTOMER_ID).like('data_type',CLOUD_DEVICE_PREFIX+'%').order('id',{ascending:true}),
+   supabaseClient.from('app_data').select('id,customer_id,data_type,payload').eq('customer_id',CLOUD_CUSTOMER_ID).eq('data_type',CLOUD_RESET_DATA_TYPE).order('id',{ascending:false}).limit(1)
+ ]);
+ if(legacyRes.error)throw legacyRes.error;
+ if(deviceRes.error)throw deviceRes.error;
+ if(resetRes.error)throw resetRes.error;
+ const resetAt=Number(resetRes.data?.[0]?.payload?.resetAt||0);
+ const rows=[...(legacyRes.data||[]),...(deviceRes.data||[])].filter(row=>Number(row.payload?.__savedAt||0)>resetAt);
+ if(!rows.length){const empty=emptyDb();empty.__cloudResetAt=resetAt;return resetAt?empty:null;}
+ let merged=emptyDb();
+ for(const row of rows) merged=mergeDb(merged,normalizeDb(row.payload));
+ const mine=(deviceRes.data||[]).filter(r=>r.data_type===CLOUD_DEVICE_DATA_TYPE && Number(r.payload?.__savedAt||0)>resetAt).sort((a,b)=>Number(b.id)-Number(a.id))[0];
+ if(mine?.id!=null)cloudDeviceRowId=Number(mine.id);
+ try{if(cloudDeviceRowId)localStorage.setItem(CLOUD_DEVICE_KEY+'_row',String(cloudDeviceRowId))}catch{}
+ merged.__cloudResetAt=resetAt;
+ return merged;
 }
 async function cloudWrite(snapshot){
  if(!supabaseClient)throw new Error('Supabase library မတင်နိုင်ပါ');
  setCloudState('syncing');
- // Always merge with the latest Cloud snapshot before writing. This prevents
- // phone A's new records from replacing phone B's records with an older snapshot.
  const latest=await cloudRead().catch(()=>null);
  const merged=mergeDb(latest||emptyDb(),snapshot);
  merged.__savedAt=Math.max(Number(snapshot?.__savedAt||0),Number(latest?.__savedAt||0),Date.now());
- const {data,error}=await supabaseClient.from('app_data').insert([{customer_id:CLOUD_CUSTOMER_ID,data_type:CLOUD_DATA_TYPE,payload:merged}]).select('id').single();
- if(error)throw error;
- const newId=data?.id;
- if(newId!=null){
-   const {error:cleanError}=await supabaseClient.from('app_data').delete().eq('customer_id',CLOUD_CUSTOMER_ID).eq('data_type',CLOUD_DATA_TYPE).lt('id',newId);
-   if(cleanError)console.warn('Cloud cleanup failed; newest snapshot is still safe:',cleanError);
+ const payload=merged;
+ let saved=false;
+ if(cloudDeviceRowId){
+   const {error}=await supabaseClient.from('app_data').update({payload}).eq('id',cloudDeviceRowId).eq('customer_id',CLOUD_CUSTOMER_ID).eq('data_type',CLOUD_DEVICE_DATA_TYPE).select('id').single();
+   if(!error)saved=true;
+ }
+ if(!saved){
+   const {data,error}=await supabaseClient.from('app_data').insert([{customer_id:CLOUD_CUSTOMER_ID,data_type:CLOUD_DEVICE_DATA_TYPE,payload}]).select('id').single();
+   if(error)throw error;
+   cloudDeviceRowId=Number(data?.id)||null;
+   try{if(cloudDeviceRowId)localStorage.setItem(CLOUD_DEVICE_KEY+'_row',String(cloudDeviceRowId))}catch{}
  }
  db=normalizeDb(mergeDb(db,merged));
  setCloudState('synced');
@@ -133,6 +167,14 @@ async function pullCloudIfNewer(){
   cloudPullBusy=true;
   try{
     const cloud=await cloudRead();
+    if(cloud?.__cloudResetAt && Number(cloud.__cloudResetAt)>Number(db?.__savedAt||0)){
+      db=emptyDb(); PRODUCT_CATALOG={};
+      try{await idbWrite(db)}catch{}
+      try{lsWrite(db)}catch{}
+      try{showHome()}catch{}
+      setCloudState('synced');
+      return true;
+    }
     if(!cloud || !hasStoredData(cloud)) return false;
     const before=JSON.stringify(normalizeDb(db));
     const merged=mergeDb(db,cloud);
@@ -279,12 +321,21 @@ async function init(){
    try{
      setCloudState('syncing');
      cloudSnapshot=await cloudRead();
-     cloudHadSnapshot=Boolean(cloudSnapshot && (hasStoredData(cloudSnapshot) || cloudSnapshot.__savedAt));
-     if(cloudHadSnapshot){
-       const localStamp=Number(db?.__savedAt||0),cloudStamp=Number(cloudSnapshot?.__savedAt||0);
-       // On Browser Refresh, never replace a newer local snapshot with an older Cloud snapshot.
-       if(cloudStamp>=localStamp) db=cloudSnapshot;
-       else if(localStamp>cloudStamp) cloudNeedsLocalPush=true;
+     const cloudResetAt=Number(cloudSnapshot?.__cloudResetAt||0);
+     if(cloudResetAt && cloudResetAt>Number(db?.__savedAt||0)){
+       db=emptyDb();
+       PRODUCT_CATALOG={};
+       try{await idbWrite(db)}catch{}
+       try{lsWrite(db)}catch{}
+       cloudSnapshot=null;
+       cloudHadSnapshot=false;
+     }else{
+       cloudHadSnapshot=Boolean(cloudSnapshot && (hasStoredData(cloudSnapshot) || cloudSnapshot.__savedAt));
+       if(cloudHadSnapshot){
+         const localStamp=Number(db?.__savedAt||0),cloudStamp=Number(cloudSnapshot?.__savedAt||0);
+         if(cloudStamp>=localStamp) db=cloudSnapshot;
+         else if(localStamp>cloudStamp) cloudNeedsLocalPush=true;
+       }
      }
    }catch(e){
      setCloudState('error');
@@ -732,7 +783,37 @@ function paymentDebtOrigins(payment){
  return lots.filter(x=>x.amount>0).map(x=>({...x,saleDate:x.originDate,saleAmount:x.amount}));
 }
 function showPaymentDetail(id){const p=db.tx.find(t=>t.id===id&&t.type==='payment');if(!p)return;const who=p.customerName||db.customers.find(c=>c.id===p.customerId)?.name||'Customer',group=p.group||db.customers.find(c=>c.id===p.customerId)?.group||'-',kind=paymentKind(p),hist=historicalPaymentSnapshot(p),beforeDebt=Number(p.beforeDebt ?? hist.beforeDebt),afterDebt=Number(p.afterDebt ?? hist.afterDebt),origins=paymentDebtOrigins(p);openModal(`<h2>${paymentKindLabel(p)}</h2><div class="sale-history-card ${kind}"><b>${esc(who)}</b><div class="muted">📍 ${esc(group)} • ${fmtDate(p.date)}</div><div style="margin-top:12px"><div>ငွေပေးမတိုင်မီ အကြွေး <b>${money(beforeDebt)}</b></div><div>ပေးငွေ <b>${money(p.amount)}</b></div><div style="margin-top:4px;color:#c62828;font-weight:700">ငွေပေးပြီး ကျန်အကြွေး <b>${money(afterDebt)}</b></div></div>${p.desc?`<div style="margin-top:8px">📝 ${esc(p.desc)}</div>`:''}<h3 style="margin-top:14px">🔎 ဒီငွေရှင်းမတိုင်ခင် အကြွေးဖြစ်လာပုံ</h3>${origins.length?origins.map(paymentAllocationHtml).join(''):'<div class="empty">အကြွေးအသေးစိတ် မရှိပါ။</div>'}<div style="margin-top:10px;text-align:right;font-weight:900">စုစုပေါင်း ${money(origins.reduce((n,x)=>n+Number(x.amount||0),0))}</div></div><div class="actions">${p.archived?`<button class="btn success" onclick="restoreTx('${p.id}')">♻️ Restore</button>`:''}<button class="btn ghost" onclick="closeModal()">ပိတ်မယ်</button></div>`)}
-async function resetData(){if(!confirm('⚠️ Data Reset လုပ်မလား?\n\nအရောင်း၊ Customer၊ ငွေရှင်း၊ အကြွေးနဲ့ အခြားလုပ်ငန်းဒေတာတွေကို ရှင်းမယ်။'))return;if(!confirm('🚨 နောက်ဆုံးအတည်ပြုချက်\n\nဒီလုပ်ဆောင်ချက်ကို ပြန်ယူလို့မရနိုင်ပါ။ Data အားလုံးကို အပြီးရှင်းမယ်။ ဆက်လုပ်မလား?'))return;const before=JSON.parse(JSON.stringify(db));try{db=emptyDb();await persist();showHome();alert('Data Reset ပြီးပါပြီ။')}catch{db=before;alert('Reset လုပ်ပြီး သိမ်းမရပါ။ Data ကို မပြောင်းဘဲ ထားထားပါတယ်။')}}
+async function resetData(){
+ if(!confirm('⚠️ Data Reset လုပ်မလား?\n\nအရောင်း၊ Customer၊ ငွေရှင်း၊ အကြွေးနဲ့ အခြားလုပ်ငန်းဒေတာတွေကို ရှင်းမယ်။'))return;
+ if(!confirm('🚨 နောက်ဆုံးအတည်ပြုချက်\n\nဖုန်းဒီလုံးရော Cloud ထဲက shared data ပါ ရှင်းမယ်။\n\nပြန်ယူလို့မရနိုင်ပါ။ ဆက်လုပ်မလား?'))return;
+ const before=JSON.parse(JSON.stringify(db));
+ const wasRunning=Boolean(cloudSyncTimer);
+ try{
+   if(wasRunning)clearInterval(cloudSyncTimer); cloudSyncTimer=null;
+   const resetAt=Date.now();
+   db=emptyDb(); PRODUCT_CATALOG={}; cloudDeviceRowId=null;
+   try{await idbWrite(db)}catch{}
+   try{localStorage.removeItem(KEY); LEGACY_KEYS.forEach(k=>localStorage.removeItem(k)); localStorage.removeItem(CLOUD_DEVICE_KEY+'_row')}catch{}
+   if(supabaseClient){
+     setCloudState('syncing');
+     const {error:markErr}=await supabaseClient.from('app_data').insert([{customer_id:CLOUD_CUSTOMER_ID,data_type:CLOUD_RESET_DATA_TYPE,payload:{resetAt}}]).select('id').single();
+     if(markErr)throw markErr;
+     const {error:delErr}=await supabaseClient.from('app_data').delete().eq('customer_id',CLOUD_CUSTOMER_ID).neq('data_type',CLOUD_RESET_DATA_TYPE);
+     if(delErr)throw delErr;
+     setCloudState('synced');
+   }
+   showHome();
+   alert('Data Reset ပြီးပါပြီ။ Local + Cloud Data အားလုံး ရှင်းပြီးပါပြီ။');
+   startCloudAutoSync();
+ }catch(e){
+   db=before;
+   try{await idbWrite(before)}catch{}
+   try{lsWrite(before)}catch{}
+   setCloudState('error');
+   if(wasRunning)startCloudAutoSync();
+   alert('❌ Data Reset မအောင်မြင်ပါ။\n\n'+(e?.message||e));
+ }
+}
 function txDetailHtml(t,archived=false){const who=t.customerName||db.customers.find(c=>c.id===t.customerId)?.name||'လမ်းကြုံဝယ်သူ',group=t.group||db.customers.find(c=>c.id===t.customerId)?.group||'-',kind=t.type==='cash'?'cash':t.type==='sale'?'credit':'credit',items=Array.isArray(t.items)&&t.items.length?`<div class="tx-items" style="margin-top:10px">${t.items.map(i=>`<div style="margin-top:6px">${esc(i.product)} ${i.variant?esc(i.variant)+' ':''}${Number(i.quantity||0)} ကဒ် — ${money(i.salePrice||0)}</div>`).join('')}</div>`:'<div class="muted" style="margin-top:10px">ပစ္စည်းအသေးစိတ် မရှိပါ။</div>';return `<div class="card ${kind}"><div class="tx-head"><div><div class="tx-type ${kind}">${t.type==='cash'?'🟢 လက်ငင်းရောင်း':'🔴 အရောင်းမှတ်တမ်း'}</div><div class="tx-meta">${fmtDate(t.date)}</div></div><div class="tx-amount ${kind}">${money(t.amount)}</div></div><div style="margin-top:10px">👤 <b>${esc(who)}</b> • 📍 ${esc(group)}</div>${t.desc?`<div style="margin-top:8px">📝 ${esc(t.desc)}</div>`:''}${items}${archived?'<div class="muted" style="margin-top:8px">🗂️ Archive ထဲတွင် သိမ်းထားသည် — စုစုပေါင်းစာရင်းနှင့် Payment တွက်ချက်မှုထဲတွင် ဆက်ပါဝင်သည်။</div>':''}</div>`}
 function salePaidAllocation(tx){
  const sid=String(tx?.id||'');

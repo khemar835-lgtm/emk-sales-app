@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ce-sales-manager-v1';
+const CACHE_NAME = 'ce-sales-manager-v3';
 const APP_SHELL = [
   './',
   './index.html',
