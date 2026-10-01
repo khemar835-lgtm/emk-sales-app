@@ -108,17 +108,19 @@ async function cloudRead(){
 async function cloudWrite(snapshot){
  if(!supabaseClient)throw new Error('Supabase library မတင်နိုင်ပါ');
  setCloudState('syncing');
- // Write the new snapshot BEFORE deleting old rows. This prevents a failed insert
- // from leaving Cloud empty. The newest row remains authoritative on refresh.
- const {data,error}=await supabaseClient.from('app_data').insert([{customer_id:CLOUD_CUSTOMER_ID,data_type:CLOUD_DATA_TYPE,payload:snapshot}]).select('id').single();
+ // Always merge with the latest Cloud snapshot before writing. This prevents
+ // phone A's new records from replacing phone B's records with an older snapshot.
+ const latest=await cloudRead().catch(()=>null);
+ const merged=mergeDb(latest||emptyDb(),snapshot);
+ merged.__savedAt=Math.max(Number(snapshot?.__savedAt||0),Number(latest?.__savedAt||0),Date.now());
+ const {data,error}=await supabaseClient.from('app_data').insert([{customer_id:CLOUD_CUSTOMER_ID,data_type:CLOUD_DATA_TYPE,payload:merged}]).select('id').single();
  if(error)throw error;
  const newId=data?.id;
  if(newId!=null){
    const {error:cleanError}=await supabaseClient.from('app_data').delete().eq('customer_id',CLOUD_CUSTOMER_ID).eq('data_type',CLOUD_DATA_TYPE).lt('id',newId);
-   if(cleanError){
-     console.warn('Cloud cleanup failed; newest snapshot is still safe:',cleanError);
-   }
+   if(cleanError)console.warn('Cloud cleanup failed; newest snapshot is still safe:',cleanError);
  }
+ db=normalizeDb(mergeDb(db,merged));
  setCloudState('synced');
  return true;
 }
@@ -132,25 +134,22 @@ async function pullCloudIfNewer(){
   try{
     const cloud=await cloudRead();
     if(!cloud || !hasStoredData(cloud)) return false;
-    const localStamp=Number(db?.__savedAt||0);
-    const cloudStamp=Number(cloud?.__savedAt||0);
-    if(cloudStamp>localStamp){
-      db=normalizeDb(cloud);
+    const before=JSON.stringify(normalizeDb(db));
+    const merged=mergeDb(db,cloud);
+    const after=JSON.stringify(merged);
+    if(after!==before){
+      db=merged;
       PRODUCT_CATALOG={};
       Object.entries(db.products||{}).forEach(([k,vs])=>{
         const key=String(k).trim();
         if(key&&Array.isArray(vs)) PRODUCT_CATALOG[key]=[...new Set(vs.map(v=>String(v).trim()).filter(Boolean))];
       });
-      try{await idbWrite(cloud)}catch{}
-      try{lsWrite(cloud)}catch{}
+      try{await idbWrite(merged)}catch{}
+      try{lsWrite(merged)}catch{}
       try{showHome()}catch{}
-      setCloudState('synced');
-      return true;
-    }
-    if(localStamp>cloudStamp){
-      // Local has a newer change (for example, a change made while offline).
-      // Push it so the other phone can receive it.
-      await cloudWrite(JSON.parse(JSON.stringify({...db,products:PRODUCT_CATALOG,__savedAt:localStamp})));
+      // If local contained records Cloud did not yet have, publish the merged result.
+      if(JSON.stringify(cloud)!==after) await cloudWrite(merged);
+      else setCloudState('synced');
       return true;
     }
     setCloudState('synced');
@@ -159,26 +158,22 @@ async function pullCloudIfNewer(){
     setCloudState('error');
     console.warn('Cloud auto-sync failed:',e);
     return false;
-  }finally{
-    cloudPullBusy=false;
-  }
+  }finally{cloudPullBusy=false;}
 }
 
 function startCloudAutoSync(){
   if(!supabaseClient) return;
   if(cloudSyncTimer) clearInterval(cloudSyncTimer);
-  // Pull frequently enough for two phones to see each other's changes.
-  cloudSyncTimer=setInterval(pullCloudIfNewer,5000);
+  cloudSyncTimer=setInterval(pullCloudIfNewer,2500);
   window.addEventListener('focus',pullCloudIfNewer);
-  document.addEventListener('visibilitychange',()=>{
-    if(document.visibilityState==='visible') pullCloudIfNewer();
-  });
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible') pullCloudIfNewer();});
   pullCloudIfNewer();
 }
 
 async function manualCloudSync(){
- try{await persist(true);alert(`☁️ Cloud Sync အောင်မြင်ပါတယ်။ Customer ${db.customers.length} ယောက်ကို Cloud ထဲသိမ်းပြီးပါပြီ။`)}catch(e){setCloudState('error');alert('☁️ Cloud Sync မအောင်မြင်ပါ။\n\n'+(e?.message||e))}
+ try{await persist(true);await pullCloudIfNewer();alert(`☁️ Cloud Sync အောင်မြင်ပါတယ်။ Customer ${db.customers.length} ယောက်ကို Cloud ထဲသိမ်းပြီးပါပြီ။`)}catch(e){setCloudState('error');alert('☁️ Cloud Sync မအောင်မြင်ပါ။\n\n'+(e?.message||e))}
 }
+
 function productOptions(){
  const keys=new Set(Object.keys(PRODUCT_CATALOG||{}));
  (db.pricing||[]).forEach(x=>{if(x?.product)keys.add(String(x.product).trim())});
@@ -221,10 +216,29 @@ function pricingRows(){const cat=PRODUCT_CATALOG&&typeof PRODUCT_CATALOG==='obje
 function validDb(x){return x&&Array.isArray(x.customers)&&Array.isArray(x.tx)}
 function normalizeDb(x){
  if(!validDb(x))return emptyDb();
- const pricing=Array.isArray(x.pricing)?x.pricing.map(p=>({product:String(p.product||'').replace(/^OOREDOO$/,'U9'),variant:String(p.variant||''),costPrice:Number.isFinite(Number(p.costPrice))?Number(p.costPrice):0,salePrice:Number.isFinite(Number(p.salePrice))?Number(p.salePrice):0})).filter(p=>p.product&&p.variant):[];
+ const pricing=Array.isArray(x.pricing)?x.pricing.map(p=>({product:String(p.product||'').replace(/^OOREDOO$/,'U9'),variant:String(p.variant||''),costPrice:Number.isFinite(Number(p.costPrice))?Number(p.costPrice):0,salePrice:Number.isFinite(Number(p.salePrice))?Number(p.salePrice):0,updatedAt:Number(p.updatedAt)||0})).filter(p=>p.product&&p.variant):[];
  let products=null; if(x.products&&typeof x.products==='object'&&!Array.isArray(x.products)){products=Object.fromEntries(Object.entries(x.products).map(([k,vs])=>[String(k).replace(/^OOREDOO$/,'U9').trim(),Array.isArray(vs)?vs.map(v=>String(v).trim()).filter(Boolean):[]]).filter(([,vs])=>vs.length));}
  if(products&&products.OOREDOO){products.U9=[...new Set([...(products.U9||[]),...products.OOREDOO])];delete products.OOREDOO;}
- return {customers:x.customers.filter(c=>c&&c.id&&c.name).map(c=>({id:String(c.id),name:String(c.name),phone:String(c.phone||''),group:String(c.group||''),extraBalance:Number.isFinite(Number(c.extraBalance))?Number(c.extraBalance):0})),tx:x.tx.filter(t=>t&&t.id&&['sale','payment','cash'].includes(t.type)&&(t.type==='cash'||t.customerId)&&Number.isFinite(Number(t.amount))).map(t=>({id:String(t.id),customerId:String(t.customerId||''),customerName:String(t.customerName||''),group:String(t.group||''),archived:Boolean(t.archived),type:t.type,amount:Number(t.amount),desc:String(t.desc||''),paymentKind:t.type==='payment'?(String(t.paymentKind||'').toLowerCase()==='partial'||t.saleId||String(t.desc||'').startsWith('အရောင်းတင်ချိန် တစ်စိတ်တစ်ပိုင်း')?'partial':'settlement'):'',saleId:String(t.saleId||''),quantity:Number.isInteger(Number(t.quantity))?Number(t.quantity):0,product:String(t.product||'').replace(/^OOREDOO$/,'U9'),variant:String(t.variant||''),items:Array.isArray(t.items)?t.items.map(i=>({product:String(i.product||'').replace(/^OOREDOO$/,'U9'),variant:String(i.variant||''),quantity:Number.isInteger(Number(i.quantity))?Number(i.quantity):0,costPrice:Number.isFinite(Number(i.costPrice))?Number(i.costPrice):null,salePrice:Number.isFinite(Number(i.salePrice))?Number(i.salePrice):null,total:Number.isFinite(Number(i.total))?Number(i.total):null})):[],date:t.date||new Date().toISOString()})),pricing,products,__savedAt:Number(x.__savedAt)||0,catalogResetV1:Boolean(x.catalogResetV1)};
+ return {customers:x.customers.filter(c=>c&&c.id&&c.name).map(c=>({id:String(c.id),name:String(c.name),phone:String(c.phone||''),group:String(c.group||''),extraBalance:Number.isFinite(Number(c.extraBalance))?Number(c.extraBalance):0,updatedAt:Number(c.updatedAt)||0})),tx:x.tx.filter(t=>t&&t.id&&['sale','payment','cash'].includes(t.type)&&(t.type==='cash'||t.customerId)&&Number.isFinite(Number(t.amount))).map(t=>({id:String(t.id),customerId:String(t.customerId||''),customerName:String(t.customerName||''),group:String(t.group||''),archived:Boolean(t.archived),deleted:Boolean(t.deleted),type:t.type,amount:Number(t.amount),desc:String(t.desc||''),paymentKind:t.type==='payment'?(String(t.paymentKind||'').toLowerCase()==='partial'||t.saleId||String(t.desc||'').startsWith('အရောင်းတင်ချိန် တစ်စိတ်တစ်ပိုင်း')?'partial':'settlement'):'',saleId:String(t.saleId||''),quantity:Number.isInteger(Number(t.quantity))?Number(t.quantity):0,product:String(t.product||'').replace(/^OOREDOO$/,'U9'),variant:String(t.variant||''),items:Array.isArray(t.items)?t.items.map(i=>({product:String(i.product||'').replace(/^OOREDOO$/,'U9'),variant:String(i.variant||''),quantity:Number.isInteger(Number(i.quantity))?Number(i.quantity):0,costPrice:Number.isFinite(Number(i.costPrice))?Number(i.costPrice):null,salePrice:Number.isFinite(Number(i.salePrice))?Number(i.salePrice):null,total:Number.isFinite(Number(i.total))?Number(i.total):null})):[],date:t.date||new Date().toISOString(),updatedAt:Number(t.updatedAt)||Number(new Date(t.date||0).getTime())||0})),pricing,products,__savedAt:Number(x.__savedAt)||0,catalogResetV1:Boolean(x.catalogResetV1)};
+}
+function mergeDb(a,b){
+ const A=normalizeDb(a||emptyDb()), B=normalizeDb(b||emptyDb());
+ const byNewest=(x,y)=>Number(y?.updatedAt||0)-Number(x?.updatedAt||0);
+ const mergeRecords=(left,right)=>{
+   const m=new Map();
+   [...left,...right].forEach(r=>{const id=String(r.id||'');if(!id)return;const old=m.get(id);if(!old||byNewest(old,r)<=0)m.set(id,r)});
+   return [...m.values()];
+ };
+ const products={...(A.products||{})};
+ Object.entries(B.products||{}).forEach(([k,vs])=>{products[k]=[...new Set([...(products[k]||[]),...(vs||[])])].filter(Boolean)});
+ return normalizeDb({
+   customers:mergeRecords(A.customers,B.customers),
+   tx:mergeRecords(A.tx,B.tx),
+   pricing:mergeRecords(A.pricing.map(x=>({...x,id:priceKey(x.product,x.variant)})),B.pricing.map(x=>({...x,id:priceKey(x.product,x.variant)}))),
+   products,
+   __savedAt:Math.max(Number(A.__savedAt||0),Number(B.__savedAt||0)),
+   catalogResetV1:Boolean(A.catalogResetV1||B.catalogResetV1)
+ });
 }
 function openIDB(){return new Promise((resolve,reject)=>{if(!('indexedDB' in window))return reject(new Error('IndexedDB unavailable'));const r=indexedDB.open(IDB_NAME,1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains(IDB_STORE))r.result.createObjectStore(IDB_STORE)};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error||new Error('IndexedDB open failed'))})}
 async function idbRead(){const dbx=await openIDB();return new Promise((resolve,reject)=>{const tx=dbx.transaction(IDB_STORE,'readonly'),req=tx.objectStore(IDB_STORE).get('db');req.onsuccess=()=>{dbx.close();resolve(req.result||null)};req.onerror=()=>{dbx.close();reject(req.error)}})}
@@ -395,7 +409,7 @@ async function saveCustomer(id,afterSave=''){
  if(saveInProgress)return;
  const before=JSON.parse(JSON.stringify(db));const btn=document.getElementById('saveCustomerBtn');const name=document.getElementById('cn').value.trim();if(!name)return alert('အမည်ထည့်ပါ');const phone=document.getElementById('cp').value.trim(),group=document.getElementById('cg').value.trim(),extraRaw=Number(document.getElementById('ce')?.value||0),extraBalance=Number.isFinite(extraRaw)&&extraRaw>=0?extraRaw:0;
  const dup=db.customers.find(c=>c.id!==id&&c.name.trim().toLowerCase()===name.toLowerCase());if(dup)return alert('ဒီအမည်ရှိပြီးသားပါ။ အမည်မထပ်အောင် မသိမ်းနိုင်ပါ။');
- saveInProgress=true;if(btn)btn.disabled=true;try{let newId=id;if(id){const c=db.customers.find(c=>c.id===id);if(!c)throw new Error('Customer not found');Object.assign(c,{name,phone,group,extraBalance})}else{newId=uid();db.customers.push({id:newId,name,phone,group,extraBalance})}await persist();closeModal();if(afterSave==='sale')saleModal(newId);else showCustomers();}catch(e){db=before;alert('Data သိမ်းမရပါ။ ထပ်မကြိုးစားခင် Backup လုပ်ပါ။')}finally{saveInProgress=false;if(btn)btn.disabled=false}}
+ saveInProgress=true;if(btn)btn.disabled=true;try{let newId=id;if(id){const c=db.customers.find(c=>c.id===id);if(!c)throw new Error('Customer not found');Object.assign(c,{name,phone,group,extraBalance,updatedAt:Date.now()})}else{newId=uid();db.customers.push({id:newId,name,phone,group,extraBalance,updatedAt:Date.now()})}await persist();closeModal();if(afterSave==='sale')saleModal(newId);else showCustomers();}catch(e){db=before;alert('Data သိမ်းမရပါ။ ထပ်မကြိုးစားခင် Backup လုပ်ပါ။')}finally{saveInProgress=false;if(btn)btn.disabled=false}}
 async function deleteCustomer(id){const before=JSON.parse(JSON.stringify(db));const c=db.customers.find(x=>x.id===id);if(!c)return;const hasTx=db.tx.some(x=>x.customerId===id);if(!confirm(`${c.name} ကို Customer စာရင်းကနေ ဖျက်မလား?${hasTx?'\n\nအရောင်း/ငွေရှင်းမှတ်တမ်းတွေကို မဖျက်ပါ။ စာရင်း၊ အရင်း၊ အမြတ်၊ ပစ္စည်းဒေတာတွေ ဆက်ရှိနေပါမယ်။':''}`))return;try{db.customers=db.customers.filter(x=>x.id!==id);await persist();showCustomers()}catch{db=before;alert('Customer ဖျက်ပြီး သိမ်းမရပါ။ Data ကို မပြောင်းဘဲ ထားထားပါတယ်။')}}
 function setSalePayment(type){
  const h=document.getElementById('salePaymentType'),pc=document.getElementById('salePayCashBtn'),cr=document.getElementById('salePayCreditBtn'),pa=document.getElementById('salePayPartialBtn'),pi=document.getElementById('salePartialArea'),inp=document.getElementById('salePaidAmount');
@@ -799,7 +813,7 @@ function txNote(t){
   return desc;
 }
 function extraModal(id){const c=db.customers.find(x=>x.id===id);if(!c)return;openModal(`<h2>💰 Customer ပိုငွေ</h2><div class="muted">${esc(c.name)} အတွက် Note သီးသန့်ဖြစ်ပြီး အကြွေးနဲ့ မချိတ်ပါ။</div><label>ပိုငွေ (Ks)</label><input id="extraEdit" type="number" min="0" step="1" inputmode="numeric" value="${Number(c.extraBalance||0)}"><div class="actions"><button class="btn primary" onclick="saveExtra('${id}')">💾 Save</button><button class="btn ghost" onclick="closeModal()">မလုပ်တော့</button></div>`)}
-async function saveExtra(id){const c=db.customers.find(x=>x.id===id);if(!c)return;const before=JSON.parse(JSON.stringify(db));const n=Number(document.getElementById('extraEdit')?.value);if(!Number.isFinite(n)||n<0)return alert('ပိုငွေကို မှန်ကန်စွာ ထည့်ပါ');c.extraBalance=n;try{await persist();closeModal();ledger(id)}catch{db=before;alert('Data သိမ်းမရပါ။')}}
+async function saveExtra(id){const c=db.customers.find(x=>x.id===id);if(!c)return;const before=JSON.parse(JSON.stringify(db));const n=Number(document.getElementById('extraEdit')?.value);if(!Number.isFinite(n)||n<0)return alert('ပိုငွေကို မှန်ကန်စွာ ထည့်ပါ');c.extraBalance=n;c.updatedAt=Date.now();try{await persist();closeModal();ledger(id)}catch{db=before;alert('Data သိမ်းမရပါ။')}}
 function openPricingPage(e){
   if(e){e.preventDefault();e.stopPropagation();}
   closeMenu();
@@ -848,9 +862,9 @@ async function deleteMainProduct(oldProduct){
     await persist(); showPricing();
   }catch(e){db=beforeDb;PRODUCT_CATALOG=beforeCat;alert('ပစ္စည်းဖျက်ပြီး Data သိမ်းမရပါ။ မူလ Data ကို ပြန်ထားထားပါတယ်။');}
 }
-async function editMainProduct(oldProduct){const oldName=String(oldProduct||'').trim();if(!oldName)return;const newName=prompt('မိန်းပစ္စည်းအမည်ကို ပြောင်းပါ',oldName);if(newName===null)return;const name=newName.trim();if(!name||name===oldName)return;if(PRODUCT_CATALOG[name]&&name!==oldName)return alert('ဒီမိန်းပစ္စည်းအမည် ရှိပြီးသားပါ။');const before=JSON.parse(JSON.stringify(db));const beforeCatalog=JSON.parse(JSON.stringify(PRODUCT_CATALOG));try{const variants=Array.isArray(PRODUCT_CATALOG[oldName])?[...PRODUCT_CATALOG[oldName]]:[];delete PRODUCT_CATALOG[oldName];PRODUCT_CATALOG[name]=variants;db.pricing=(db.pricing||[]).map(x=>String(x.product||'').trim()===oldName?{...x,product:name}:x);db.products=PRODUCT_CATALOG;await persist();showPricing();}catch(e){db=before;PRODUCT_CATALOG=beforeCatalog;alert('မိန်းပစ္စည်းအမည် ပြောင်းပြီး သိမ်းမရပါ။')}}
-function addNewProduct(){const product=document.getElementById('newProduct')?.value.trim(),variant=document.getElementById('newVariant')?.value.trim();if(!product||!variant)return alert('အဓိကပစ္စည်းနဲ့ အမျိုးအစားကွဲ နှစ်ခုလုံးထည့်ပါ');if(!PRODUCT_CATALOG[product])PRODUCT_CATALOG[product]=[];if(PRODUCT_CATALOG[product].includes(variant))return alert('ဒီအမျိုးအစားကွဲ ရှိပြီးသားပါ');PRODUCT_CATALOG[product].push(variant);db.products=PRODUCT_CATALOG;if(!db.pricing.find(x=>x.product===product&&x.variant===variant))db.pricing.push({product,variant,costPrice:0,salePrice:0});persist().then(()=>{showPricing();alert('ပစ္စည်းအသစ် ထည့်ပြီးပါပြီ။')}).catch(()=>alert('Data သိမ်းမရပါ။'))}
-async function savePricing(){const before=JSON.parse(JSON.stringify(db));const rows=pricingRows();db.pricing=rows.map((r,i)=>({product:r.product,variant:r.variant,costPrice:Math.max(0,Number(document.querySelector(`.pcost[data-i="${i}"]`)?.value||0)),salePrice:Math.max(0,Number(document.querySelector(`.psale[data-i="${i}"]`)?.value||0))}));if(db.pricing.some(p=>p.salePrice>0&&p.costPrice>p.salePrice)){if(!confirm('အချို့ပစ္စည်းမှာ ဝယ်ဈေးက ရောင်းဈေးထက်မြင့်နေပါတယ်။ ဆက်သိမ်းမလား?')){db=before;return}}try{await persist();showPricing();alert('ရောင်း/ဝယ်/အမြတ် သတ်မှတ်ချက် သိမ်းပြီးပါပြီ။')}catch{db=before;alert('Data သိမ်းမရပါ။')}}
+async function editMainProduct(oldProduct){const oldName=String(oldProduct||'').trim();if(!oldName)return;const newName=prompt('မိန်းပစ္စည်းအမည်ကို ပြောင်းပါ',oldName);if(newName===null)return;const name=newName.trim();if(!name||name===oldName)return;if(PRODUCT_CATALOG[name]&&name!==oldName)return alert('ဒီမိန်းပစ္စည်းအမည် ရှိပြီးသားပါ။');const before=JSON.parse(JSON.stringify(db));const beforeCatalog=JSON.parse(JSON.stringify(PRODUCT_CATALOG));try{const variants=Array.isArray(PRODUCT_CATALOG[oldName])?[...PRODUCT_CATALOG[oldName]]:[];delete PRODUCT_CATALOG[oldName];PRODUCT_CATALOG[name]=variants;db.pricing=(db.pricing||[]).map(x=>String(x.product||'').trim()===oldName?{...x,product:name,updatedAt:Date.now()}:x);db.products=PRODUCT_CATALOG;await persist();showPricing();}catch(e){db=before;PRODUCT_CATALOG=beforeCatalog;alert('မိန်းပစ္စည်းအမည် ပြောင်းပြီး သိမ်းမရပါ။')}}
+function addNewProduct(){const product=document.getElementById('newProduct')?.value.trim(),variant=document.getElementById('newVariant')?.value.trim();if(!product||!variant)return alert('အဓိကပစ္စည်းနဲ့ အမျိုးအစားကွဲ နှစ်ခုလုံးထည့်ပါ');if(!PRODUCT_CATALOG[product])PRODUCT_CATALOG[product]=[];if(PRODUCT_CATALOG[product].includes(variant))return alert('ဒီအမျိုးအစားကွဲ ရှိပြီးသားပါ');PRODUCT_CATALOG[product].push(variant);db.products=PRODUCT_CATALOG;if(!db.pricing.find(x=>x.product===product&&x.variant===variant))db.pricing.push({product,variant,costPrice:0,salePrice:0,updatedAt:Date.now()});persist().then(()=>{showPricing();alert('ပစ္စည်းအသစ် ထည့်ပြီးပါပြီ။')}).catch(()=>alert('Data သိမ်းမရပါ။'))}
+async function savePricing(){const before=JSON.parse(JSON.stringify(db));const rows=pricingRows();db.pricing=rows.map((r,i)=>{const old=db.pricing.find(x=>String(x.product)===String(r.product)&&String(x.variant)===String(r.variant));return {product:r.product,variant:r.variant,costPrice:Math.max(0,Number(document.querySelector(`.pcost[data-i=\"${i}\"]`)?.value||0)),salePrice:Math.max(0,Number(document.querySelector(`.psale[data-i=\"${i}\"]`)?.value||0)),updatedAt:Date.now()};});if(db.pricing.some(p=>p.salePrice>0&&p.costPrice>p.salePrice)){if(!confirm('အချို့ပစ္စည်းမှာ ဝယ်ဈေးက ရောင်းဈေးထက်မြင့်နေပါတယ်။ ဆက်သိမ်းမလား?')){db=before;return}}try{await persist();showPricing();alert('ရောင်း/ဝယ်/အမြတ် သတ်မှတ်ချက် သိမ်းပြီးပါပြီ။')}catch{db=before;alert('Data သိမ်းမရပါ။')}}
 function reportRange(mode,startKey,endKey){
  const now=new Date(),today=localDateKey(now);
  if(mode==='today')return {start:today,end:today,label:'ဒီနေ့'};
