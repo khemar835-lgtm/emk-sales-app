@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="my">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f172a"><title>C&E Sales Manager</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;background:#e8eef6;color:#172033;font-family:system-ui,-apple-system,"Noto Sans Myanmar",sans-serif}button,input,textarea,select{font:inherit}.app{max-width:560px;min-height:100vh;margin:auto;background:#f8fafc;position:relative;box-shadow:0 0 30px #00000012}.top{position:sticky;top:0;z-index:40;background:linear-gradient(135deg,#155e75,#1d4ed8);color:#fff;padding:12px 14px 10px}.toprow{display:flex;align-items:center;gap:10px;min-height:42px}.top h1{margin:0;font-size:19px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cloudBadge{font-size:10px;line-height:1.15;white-space:nowrap;max-width:155px;overflow:hidden;text-overflow:ellipsis;opacity:.95}.toprow #cloudSyncStatusTop{flex:0 1 auto}.card #cloudSyncStatus{font-size:11px;line-height:1.25}.searchWrap{position:relative;margin-top:9px}.search{width:100%;margin-top:0;padding-right:42px;padding:11px 13px;border:0;border-radius:12px;font-size:16px;box-shadow:0 2px 10px #0002}.backrow{display:flex;justify-content:flex-end;padding-top:7px}.back{border:0;background:#0f3f55;color:#fff;border-radius:10px;padding:8px 12px}.searchWrap>button{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:30px;height:30px;border:0;border-radius:50%;background:#e2e8f0;color:#334155;font-size:22px;line-height:28px;padding:0;cursor:pointer}.searchWrap>button:active{transform:translateY(-50%) scale(.95)}.hidden{display:none!important}main{padding:14px 14px 108px}.homeSummary{position:sticky;top:70px;z-index:25;background:#f8fafc;padding:0 0 8px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.card{background:#fff;border-radius:16px;padding:12px;box-shadow:0 2px 12px #0000000d;margin-bottom:7px}.metric{border-top:4px solid #2563eb}.metric b{display:block;font-size:20px;margin-top:5px}.muted{color:#64748b;font-size:13px}.row{display:flex;align-items:center;gap:8px}.between{justify-content:space-between}.list{display:flex;flex-direction:column;gap:5px}.customer{cursor:pointer}.customer b{font-size:16px}.balance{font-weight:800;white-space:nowrap}.negative{color:#dc2626}.zero{color:#15803d}.btn{border:0;border-radius:11px;padding:10px 13px;font-weight:700;cursor:pointer}.primary{background:#2563eb;color:#fff}.light{background:#e8eef7;color:#172033}.danger{background:#fee2e2;color:#b91c1c}.btn:disabled{opacity:.45;cursor:not-allowed}.success{background:#dcfce7;color:#166534}.form-actions{display:flex;gap:8px;margin-top:14px}.form-actions>*{flex:1}label{display:block;font-size:13px;font-weight:700;margin:10px 0 5px}input,textarea,select{width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:11px;background:#fff;font-size:16px}textarea{min-height:90px;resize:vertical}.record{padding:5px 6px;border-left:3px solid #2563eb;margin-bottom:5px;border-radius:10px}.record.debtRecord{border-left-color:#dc2626;background:#fffafa}.record.payRecord{border-left-color:#16a34a;background:#f7fff9}.record .amount{font-size:16px;font-weight:800}.record .muted{font-size:14px}.record .typeBadge{font-size:13px;padding:4px 7px}.recordGrid{gap:3px;margin-top:3px}.record .kv{padding:4px 7px;font-size:13px;border-radius:7px}.record .kv b{font-size:14px}.record > div[style*="margin-top:7px"]{margin-top:4px!important;font-size:12px}.record .btn{padding:7px 9px;font-size:13px}.record .lineAdd{padding:6px}.totalPayRecord{border-left-color:#2563eb;background:#f7faff}.cashRecord{border-left-color:#16a34a;background:#f7fff9}.totalPayBadge{background:#dbeafe;color:#1d4ed8}.cashBadge{background:#dcfce7;color:#166534}.choiceBox{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:6px 0}.choice{border:1px solid #cbd5e1;border-radius:10px;padding:9px 6px;background:#fff;font-weight:800}.choice.selected{box-shadow:0 0 0 2px #2563eb inset}.choice.redChoice.selected{background:#fee2e2;color:#b91c1c}.choice.blueChoice.selected{background:#dbeafe;color:#1d4ed8}.choice.greenChoice.selected{background:#dcfce7;color:#166534}.choice.orangeChoice.selected{background:#ffedd5;color:#c2410c}.empty{text-align:center;color:#64748b;padding:28px 10px}.fab{position:fixed;z-index:35;right:max(18px,calc((100vw - 560px)/2 + 18px));bottom:82px;width:54px;height:54px;border:0;border-radius:50%;background:#2563eb;color:#fff;font-size:27px;box-shadow:0 8px 25px #0003;cursor:pointer}.bottom{position:fixed;z-index:1000;pointer-events:auto;bottom:0;left:50%;transform:translateX(-50%);width:min(560px,100%);height:72px;padding:7px 5px calc(7px + env(safe-area-inset-bottom));background:#fff;border-top:1px solid #dbe4ef;display:grid;grid-template-columns:repeat(4,1fr);box-shadow:0 -4px 16px #0000000b}.navbtn{pointer-events:auto;touch-action:manipulation;border:0;background:transparent;color:#64748b;border-radius:12px;font-size:11px;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer}.navbtn .ico{font-size:20px;line-height:20px}.navbtn.active{background:#dbeafe;color:#1d4ed8}.toast{position:fixed;z-index:60;left:50%;bottom:88px;transform:translateX(-50%) translateY(20px);background:#172033;color:#fff;padding:10px 15px;border-radius:12px;opacity:0;pointer-events:none;transition:.2s;max-width:90%;font-size:14px}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}.pill{display:inline-block;padding:4px 8px;border-radius:99px;background:#e0f2fe;color:#075985;font-size:12px}.sectionTitle{font-size:16px;font-weight:800;margin-bottom:10px}.successText{color:#166534}.iconTitle{display:flex;align-items:center;gap:8px}.iconCircle{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#eff6ff;font-size:18px}.dayFilter{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end}.summaryBox{background:#eff6ff;border-radius:12px;padding:10px;margin-top:10px}.payBox{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:14px;padding:12px;margin-top:10px}.typeBadge{font-size:12px;font-weight:800;padding:4px 8px;border-radius:99px}.debtBadge{background:#fee2e2;color:#b91c1c}.payBadge{background:#dcfce7;color:#166534}.splitBox{border:1px solid #cbd5e1;border-radius:13px;overflow:hidden;margin-top:6px;background:#fff}.splitCols{display:grid;grid-template-columns:1fr 1fr}.splitCol{padding:10px;min-width:0}.splitCol+ .splitCol{border-left:1px solid #cbd5e1}.splitHead{font-weight:800;font-size:13px;margin-bottom:7px}.lineList{display:flex;flex-direction:column;gap:7px}.lineRow{display:flex;gap:6px}.lineRow input{min-width:0;padding:9px}.lineAdd{width:100%;margin-top:7px;padding:8px;border:1px dashed #94a3b8;background:#f8fafc;border-radius:9px;font-weight:700;cursor:pointer}.mini{font-size:12px}.recordGrid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:5px}.kv{background:#f8fafc;border-radius:8px;padding:5px 7px;font-size:12px}.kv b{display:block;margin-top:1px;font-size:13px}.homeList{margin-top:7px}.summaryLink{cursor:pointer}.villageLink{cursor:pointer}.compactCustomer{padding:7px 9px!important;border-radius:11px!important}.recordsCompact{gap:4px!important}.recordsCompact .record{margin-bottom:0}.customerListCompact{gap:4px!important}.customerListCompact .record{padding:4px 5px}.customerListCompact .recordGrid{grid-template-columns:1fr 1fr}.customerListCompact .notesHtml{font-size:11px}
+.record{padding:6px 8px!important;margin-bottom:4px!important;border-radius:10px}.record .row{gap:5px}.record .row:first-child{white-space:nowrap}.record .row:first-child .muted{font-size:13px}.record .row:nth-child(2){margin-top:2px}.record .row:nth-child(2)>b{font-size:18px}.record .typeBadge{font-size:13px;padding:4px 7px}.record .pill{font-size:12px;padding:3px 7px}.recordGrid{gap:4px;margin-top:3px}.record .kv{padding:4px 6px;font-size:13px;line-height:1.15}.record .kv b{font-size:16px;margin-top:2px}.recordLine{margin-top:4px;font-size:15px;line-height:1.3;color:#475569}.productLine{font-weight:700;color:#334155}.noteLine{font-weight:500}.recordActions{margin-top:5px!important}.recordActions .btn{padding:6px 10px;font-size:14px}.recordsCompact .record{margin-bottom:4px!important}.customerListCompact .record{padding:6px 8px!important;margin-bottom:4px!important}
+</style>
+</head>
+<body><div class="app" id="app">
+<header class="top"><div class="toprow"><h1 id="title">ပင်မစာမျက်နှာ</h1><span id="cloudSyncStatusTop" class="cloudBadge">📶 Wi-Fi Sync</span></div><div class="backrow"><button class="back hidden" id="backBtn">← နောက်သို့</button></div><div class="searchWrap" id="searchWrap"><input id="search" class="search" placeholder="အမည် / ဖုန်း / ရွာ Search"><button id="clearSearch" class="hidden" type="button" aria-label="ရှာဖွေမှုဖျက်ရန်" title="ရှာဖွေမှုဖျက်ရန်">×</button></div></header>
+<main id="main"></main><button id="fab" class="fab" aria-label="ဖောက်သည်အသစ်">＋</button>
+<nav class="bottom" aria-label="အောက်ခြေမီနူး"><button class="navbtn active" data-nav="home"><span class="ico">🏠</span><span>ပင်မစာမျက်နှာ</span></button><button class="navbtn" data-nav="debt"><span class="ico">💰</span><span>စုစုပေါင်းအကြွေး</span></button><button class="navbtn" data-nav="records"><span class="ico">📋</span><span>မှတ်တမ်း</span></button><button class="navbtn" data-nav="menu"><span class="ico">☰</span><span>မီနူး</span></button></nav><div id="toast" class="toast"></div></div>
+
+<script>
+"use strict";
+const KEY="ce_debt_ledger_v6",BACKUP_KEY="ce_debt_ledger_backup_v6",BACKUP_BEFORE_RESTORE_KEY="emk_backup_before_restore_v1",CUSTOMER_ORDER_KEY="emk_customer_order_v1";
+const OLD_KEYS=["ce_debt_ledger_v5","ce_debt_ledger_backup_v5","ce_debt_ledger_v4","ce_debt_ledger_backup_v4","ce_debt_ledger_v3","ce_debt_ledger_backup_v3","ce_debt_ledger_v2","ce_debt_ledger_v1","ce_debt_ledger_backup_v1"];
+const VILLAGES=["ရွာသစ်","စက်စု","စံကင်း","ချောင်းနားစု","မယ်စိန်စု","ဝဲကြီး"];
+function villageOptions(selected=""){
+  const current=String(selected||"").trim();
+  const villages=[...VILLAGES];
+  if(current && !villages.includes(current)) villages.unshift(current);
+  return `<option value="">ရွာရွေးရန်</option>`+villages.map(v=>`<option value="${esc(v)}" ${v===current?"selected":""}>${esc(v)}</option>`).join("");
+}
+let state={customers:[],deletedRecords:[],productMenu:[]};let view={page:"home",customerId:null,recordId:null,recordDate:""};
+
+/* ===== Core helpers restored/fixed ===== */
+function $(id){return document.getElementById(id)}
+function uid(){return "id-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,9)}
+function stableId(prefix,value){let h=2166136261;const str=String(value??"");for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619)}return prefix+"-"+(h>>>0).toString(36)}
+function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+function norm(v){return String(v??"").normalize("NFC").trim().toLocaleLowerCase()}
+function money(v){return new Intl.NumberFormat("en-US").format(Math.round(Number(v)||0))+" ကျပ်"}
+function nowISO(){return new Date().toISOString()}
+function dateOnly(v){const d=v instanceof Date?v:new Date(v);if(Number.isNaN(d.getTime()))return "";return d.toISOString().slice(0,10)}
+function localInput(v){const d=v instanceof Date?new Date(v):new Date(v);if(Number.isNaN(d.getTime()))return "";const p=n=>String(n).padStart(2,"0");return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`}
+function labelDate(v){const d=v instanceof Date?v:new Date(v);if(Number.isNaN(d.getTime()))return String(v??"");return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,"0")}/${String(d.getDate()).padStart(2,"0")} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`}
+function dayName(v){const d=new Date(v);if(Number.isNaN(d.getTime()))return "";return ["တနင်္ဂနွေ","တနင်္လာ","အင်္ဂါ","ဗုဒ္ဓဟူး","ကြာသပတေး","သောကြာ","စနေ"][d.getDay()]}
+function getC(){return state.customers.find(c=>c.id===view.customerId)||null}
+function recordType(r){return isRepayment(r)?"repayment":"sale"}
+function isSale(r){return !!r&&String(r.type||"").toLowerCase()==="sale"}
+function isRepayment(r){return !!r&&String(r.type||"").toLowerCase()==="repayment"}
+function saleAmount(r){return Math.max(0,Number(r?.saleTotal??r?.debt??0)||0)}
+function immediatePaid(r){return Math.max(0,Number(r?.immediatePaid??r?.paid??0)||0)}
+function repaymentAmount(r){return Math.max(0,Number(r?.repaymentAmount??r?.paid??0)||0)}
+function debtOutstanding(c,r){return Math.max(0,saleAmount(r)-immediatePaid(r))}
+function activeRecords(){return state.customers.flatMap(c=>(Array.isArray(c.records)?c.records:[]).map(r=>({...r,customerId:c.id,customerName:c.name,village:c.village||""}))).filter(r=>!r.deleted)
+}
+function totalDebt(){return state.customers.reduce((sum,c)=>sum+balance(c),0)}
+function balance(c){
+  if(!c)return 0;
+  const records=Array.isArray(c.records)?c.records:[];
+  const sales=records.filter(isSale).reduce((s,r)=>s+debtOutstanding(c,r),0);
+  const payments=records.filter(isRepayment).reduce((s,r)=>s+repaymentAmount(r),0);
+  return Math.max(0,sales-payments);
+}
+function allocatePayment(c,amount,excludeId=null){
+  let remaining=Math.max(0,Number(amount)||0),allocations=[];
+  const sales=(Array.isArray(c?.records)?c.records:[]).filter(isSale).slice().sort((a,b)=>new Date(a.date)-new Date(b.date)||String(a.id).localeCompare(String(b.id)));
+  const used=new Map();
+  // Rebuild prior payment allocation chronologically so each sale cannot be
+  // allocated twice just because the raw sale amount is still present.
+  const payments=(Array.isArray(c?.records)?c.records:[]).filter(r=>isRepayment(r)&&r.id!==excludeId).slice().sort((a,b)=>new Date(a.date)-new Date(b.date)||String(a.id).localeCompare(String(b.id)));
+  for(const pay of payments){
+    let p=Math.max(0,repaymentAmount(pay));
+    for(const sale of sales){
+      if(p<=0)break;
+      const cap=Math.max(0,saleAmount(sale)-immediatePaid(sale)-(used.get(sale.id)||0));
+      if(cap<=0)continue;
+      const applied=Math.min(p,cap);
+      used.set(sale.id,(used.get(sale.id)||0)+applied);
+      p-=applied;
+    }
+  }
+  for(const sale of sales){
+    if(remaining<=0)break;
+    const outstanding=Math.max(0,saleAmount(sale)-immediatePaid(sale)-(used.get(sale.id)||0));
+    if(outstanding<=0)continue;
+    const applied=Math.min(remaining,outstanding);
+    allocations.push({recordId:sale.id,saleId:sale.saleId||"",amount:applied});
+    remaining-=applied;
+  }
+  return {allocations,unapplied:Math.max(0,remaining)};
+}
+function paymentContext(c,r){
+  const before=Math.max(0,balance(c)+repaymentAmount(r));
+  const after=Math.max(0,before-repaymentAmount(r));
+  return {before,after}
+}
+function nextSaleId(c){
+  const n=(Array.isArray(c?.records)?c.records:[]).filter(isSale).length+1;
+  return "SALE-"+String(n).padStart(4,"0")
+}
+function nextRepaymentId(c){
+  const n=(Array.isArray(c?.records)?c.records:[]).filter(isRepayment).length+1;
+  return "PAY-"+String(n).padStart(4,"0")
+}
+function normalizeState(input){
+  const src=input&&typeof input==="object"?input:{};
+  const customers=Array.isArray(src.customers)?src.customers:[];
+  const order=src.customerSortMode==="oldest"?"oldest":(src.customerSortMode==="newest"?"newest":(localStorage.getItem(CUSTOMER_ORDER_KEY)==="oldest"?"oldest":"newest"));
+  return {
+    customerSortMode:order,
+    customers:customers.filter(Boolean).map((c,i)=>{
+      const records=Array.isArray(c.records)?c.records:[], cid=String(c.id||stableId("customer",`${c.name||""}|${c.phone||""}|${c.village||""}|${i}`));
+      return {
+        ...c,id:cid,name:String(c.name??""),phone:String(c.phone??""),village:String(c.village??""),
+        extraNote:String(c.extraNote??""),creditNote:Number(c.creditNote)||0,creditNoteNote:String(c.creditNoteNote??""),
+        extraNoteAmount:Number(c.extraNoteAmount)||0,extraNoteAmountNote:String(c.extraNoteAmountNote??""),
+        debtNote:0,debtNoteNote:String(c.debtNoteNote??""),updatedAt:c.updatedAt||"",
+        records:records.filter(Boolean).map((r,j)=>{
+          const rid=String(r.id||stableId("record",`${cid}|${r.type||""}|${r.date||""}|${r.saleId||r.repaymentId||""}|${j}`));
+          const dt=r.date||"";
+          return {...r,id:rid,type:isRepayment(r)?"repayment":"sale",date:dt,dateLabel:r.dateLabel||(dt?labelDate(dt):""),products:Array.isArray(r.products)?r.products:[],notes:Array.isArray(r.notes)?r.notes:(r.note?[String(r.note)]:[]),updatedAt:r.updatedAt||""};
+        })
+      }
+    }).map(c=>{
+      const sales=(Array.isArray(c.records)?c.records:[]).filter(isSale);
+      const payments=(Array.isArray(c.records)?c.records:[]).filter(isRepayment);
+      c.debtNote=Math.max(0,sales.reduce((sum,r)=>sum+debtOutstanding(c,r),0)-payments.reduce((sum,r)=>sum+repaymentAmount(r),0));
+      return c;
+    }),
+    deletedRecords:Array.isArray(src.deletedRecords)?src.deletedRecords.filter(Boolean):[],
+    deletedCustomers:Array.isArray(src.deletedCustomers)?src.deletedCustomers.filter(Boolean):[],
+    productMenu:Array.isArray(src.productMenu)?src.productMenu.filter(Boolean).map(x=>({id:String(x.id||stableId("product",`${x.product||""}|${x.variant||""}`)),product:String(x.product||""),variant:String(x.variant||"")})):[]
+  };
+}
+
+function toast(msg){
+  const el=$("toast");if(!el)return;
+  el.textContent=String(msg||"");el.classList.add("show");
+  clearTimeout(toast._t);toast._t=setTimeout(()=>el.classList.remove("show"),2600)
+}
+/* ===== EMK Wi-Fi Sync ===== */
+const WIFI_API="/api/state";
+let wifiRevision=0,wifiApplying=false,wifiPollTimer=null,wifiSaveInFlight=false;
+function wifiStatus(msg){const t=$("cloudSyncStatusTop");if(t)t.textContent=String(msg||"📶 Wi-Fi Sync");}
+async function wifiGet(){const r=await fetch(WIFI_API,{cache:"no-store"});if(!r.ok)throw new Error("Wi-Fi server error "+r.status);return r.json()}
+async function wifiPut(next){const r=await fetch(WIFI_API,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({state:normalizeState(next)})});if(!r.ok)throw new Error("Wi-Fi save error "+r.status);return r.json()}
+async function pullWiFi(){try{const x=await wifiGet(),rev=Number(x.revision)||0;if(rev>wifiRevision&&!wifiSaveInFlight&&!wifiApplying){const next=normalizeState(x.state||{});if(JSON.stringify(next)!==JSON.stringify(state)){wifiApplying=true;state=next;const raw=JSON.stringify(state);try{await idbPut(raw);localStorage.setItem(KEY,raw);localStorage.setItem(BACKUP_KEY,raw)}catch(e){}render()}wifiRevision=rev;wifiStatus("🟢 Wi-Fi: ချိတ်ဆက်ပြီး")}return true}catch(e){wifiStatus("🔴 Wi-Fi Server မချိတ်နိုင်ပါ");return false}finally{wifiApplying=false}}
+function startWiFiPolling(){clearInterval(wifiPollTimer);wifiPollTimer=setInterval(()=>pullWiFi(),1000)}
+const DB_NAME="CE_SALES_MANAGER_DB_V1",DB_STORE="app_state";let dbPromise=null;
+function openDB(){if(dbPromise)return dbPromise;dbPromise=new Promise((resolve,reject)=>{if(!window.indexedDB)return reject(new Error("IndexedDB unavailable"));const req=indexedDB.open(DB_NAME,1);req.onupgradeneeded=e=>{const db=e.target.result;if(!db.objectStoreNames.contains(DB_STORE))db.createObjectStore(DB_STORE)};req.onsuccess=e=>resolve(e.target.result);req.onerror=()=>reject(req.error||new Error("IndexedDB open failed"))});return dbPromise}
+function idbPut(raw){return openDB().then(db=>new Promise((resolve,reject)=>{const tx=db.transaction(DB_STORE,"readwrite");tx.objectStore(DB_STORE).put(raw,"state");tx.oncomplete=()=>resolve(true);tx.onerror=()=>reject(tx.error||new Error("IndexedDB write failed"))}))}
+function idbGet(){return openDB().then(db=>new Promise((resolve,reject)=>{const tx=db.transaction(DB_STORE,"readonly"),req=tx.objectStore(DB_STORE).get("state");req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>reject(req.error||new Error("IndexedDB read failed"))}))}
+function encodeHash(raw){try{let bytes=new TextEncoder().encode(raw),bin="";for(const b of bytes)bin+=String.fromCharCode(b);return btoa(bin).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/g,"")}catch(e){return ""}}
+function decodeHash(v){try{v=v.replace(/-/g,"+").replace(/_/g,"/");while(v.length%4)v+="=";const bin=atob(v),bytes=Uint8Array.from(bin,c=>c.charCodeAt(0));return new TextDecoder().decode(bytes)}catch(e){return null}}
+function writeHash(raw){return true}
+function readHash(){try{const h=location.hash;if(!h.startsWith("#data="))return null;return decodeHash(h.slice(6))}catch(e){return null}}
+async function save(){const raw=JSON.stringify(state);try{await idbPut(raw)}catch(e){}try{localStorage.setItem(KEY,raw);localStorage.setItem(BACKUP_KEY,raw)}catch(e){}try{wifiSaveInFlight=true;const r=await wifiPut(state);wifiRevision=Number(r.revision)||wifiRevision;wifiStatus("🟢 Wi-Fi: သိမ်းပြီး")}catch(e){wifiStatus("🟠 Local သိမ်းထား — Server မရသေးပါ")}finally{wifiSaveInFlight=false}return true}
+async function load(){try{const x=await wifiGet();if(x&&x.state){state=normalizeState(x.state);wifiRevision=Number(x.revision)||0;const raw=JSON.stringify(state);try{await idbPut(raw);localStorage.setItem(KEY,raw);localStorage.setItem(BACKUP_KEY,raw)}catch(e){}wifiStatus("🟢 Wi-Fi: ချိတ်ဆက်ပြီး");return true}}catch(e){}let raw=null;try{raw=await idbGet()}catch(e){}if(!raw){try{raw=localStorage.getItem(KEY)}catch(e){}}if(!raw){try{for(const k of OLD_KEYS){const v=localStorage.getItem(k);if(v){raw=v;break}}}catch(e){}}if(!raw){try{raw=localStorage.getItem(BACKUP_KEY)}catch(e){}}if(raw){try{const x=normalizeState(JSON.parse(raw));if(x){state=x;return true}}catch(e){}}return false}
+function navPage(page){
+view={page,customerId:null,recordId:null,recordDate:""};render()}
+function setNavActive(){document.querySelectorAll(".navbtn").forEach(b=>b.classList.toggle("active",(view.page==="home"?"home":view.page==="debt"?"debt":view.page==="records"?"records":"menu")===b.dataset.nav))}
+function render(){updateSearchClear();const inner=!['home','debt','records','menu'].includes(view.page);$("searchWrap")?.classList.toggle("hidden",view.page!=="home");$("search").classList.toggle("hidden",view.page!=="home");$("fab").classList.toggle("hidden",view.page!=="home");$("backBtn").classList.toggle("hidden",!inner);setNavActive();if(view.page==="home")renderHome();else if(view.page==="debt")renderDebt();else if(view.page==="records")renderRecords();else if(view.page==="village")renderVillage();else if(view.page==="customer")renderCustomer();else if(view.page==="customerForm")renderCustomerForm();else if(view.page==="recordForm")renderRecordForm();else if(view.page==="paymentForm")renderPaymentForm();else if(view.page==="trash")renderTrash();else if(view.page==="extraList")renderSpecialVillages("extraList");else if(view.page==="remainingList")renderSpecialVillages("remainingList");else if(view.page==="productMenu")renderProductMenuPage();else if(view.page==="specialCustomers")renderSpecialCustomers(view.specialKind,view.specialVillage);else renderMenuPage()}
+function renderHome(){
+  $("title").textContent="ပင်မစာမျက်နှာ";
+  const q=norm($("search").value),filtered=state.customers.filter(c=>norm([c.name,c.phone,c.village].join(" ")).includes(q)),cs=filtered;
+  $("main").innerHTML=`<div class="homeSummary"><div class="grid"><div class="card metric summaryLink" id="homeDebtSummary"><div class="muted">💰 စုစုပေါင်းအကြွေး</div><b>${money(totalDebt())}</b><div class="mini muted">နှိပ်ပြီး ရွာအလိုက်ကြည့်ရန်</div></div><div class="card metric"><div class="muted">👥 ဖောက်သည်</div><b>${state.customers.length} ယောက်</b></div></div></div><div class="card"><div class="row between"><div class="iconTitle"><span class="iconCircle">👥</span><b>ဖောက်သည်များ</b></div><button class="btn light" id="customerOrderBtn">${state.customerSortMode==="newest"?"🔼 အသစ် အပေါ်":"🔽 အသစ် အောက်"}</button></div><div class="muted" style="margin:5px 0 7px">Customer အသစ်ထည့်တဲ့နေရာကို ရွေးနိုင်ပါတယ်။</div><div class="list homeList customerListCompact">${cs.length?cs.map(c=>`<div class="card customer compactCustomer" data-open="${esc(c.id)}"><div class="row between"><div><b>${esc(c.name)}</b><div class="muted">📞 ${esc(c.phone||"ဖုန်းမရှိ")} · 📍 ${esc(c.village||"ရွာမသတ်မှတ်ရသေး")}</div></div><div class="balance ${balance(c)>0?"negative":"zero"}">${money(balance(c))}</div></div></div>`).join(""):'<div class="empty">ဖောက်သည်မတွေ့ပါ</div>'}</div></div>`;
+  $("homeDebtSummary").onclick=()=>navPage("debt");
+  $("customerOrderBtn").onclick=async()=>{state.customerSortMode=state.customerSortMode==="newest"?"oldest":"newest";try{localStorage.setItem(CUSTOMER_ORDER_KEY,state.customerSortMode)}catch(e){};if(await save()){toast(state.customerSortMode==="newest"?"Customer အသစ်ကို အပေါ်မှာထားမယ်":"Customer အသစ်ကို အောက်မှာထားမယ်");render()}};
+  document.querySelectorAll("[data-open]").forEach(el=>el.onclick=()=>{view={page:"customer",customerId:el.dataset.open,recordId:null};render()});
+}
+function villageTotals(){const m={};state.customers.forEach(c=>{const v=c.village||"မသတ်မှတ်ရသေး";m[v]=(m[v]||0)+balance(c)});return Object.entries(m).sort((a,b)=>b[1]-a[1])}
+function renderDebt(){
+  $("title").textContent="စုစုပေါင်းအကြွေး";
+  const rows=villageTotals();
+  $("main").innerHTML=`<div class="card metric"><div class="muted">💰 လက်ရှိ စုစုပေါင်းအကြွေး</div><b>${money(totalDebt())}</b></div><div class="card"><div class="sectionTitle">📍 ရွာအလိုက်</div>${rows.length?rows.map(([v,total])=>{const members=state.customers.filter(c=>(c.village||"မသတ်မှတ်ရသေး")==v).sort((a,b)=>balance(b)-balance(a));const positive=members.filter(c=>balance(c)>0);return `<div class="card villageLink" style="margin:0 0 8px;background:#f8fbff;border:1px solid #e0eaf5" data-village="${esc(v)}"><div class="row between"><div><b>📍 ${esc(v)}</b><div class="muted">👥 ဖောက်သည် ${positive.length} ယောက်</div></div><b class="${total>0?"negative":"zero"}">${money(total)}</b></div></div>`}).join(""):'<div class="empty">အကြွေးမရှိသေးပါ</div>'}</div>`;
+  document.querySelectorAll("[data-village]").forEach(el=>el.onclick=()=>{view={page:"village",customerId:null,recordId:null,recordDate:el.dataset.village};render()});
+}
+function renderVillage(){
+  const village=view.recordDate; const members=state.customers.filter(c=>(c.village||"မသတ်မှတ်ရသေး")==village).sort((a,b)=>balance(b)-balance(a));
+  const total=members.reduce((a,c)=>a+balance(c),0), owing=members.filter(c=>balance(c)>0);
+  $("title").textContent=village;
+  $("main").innerHTML=`<div class="card metric"><div class="muted">📍 ${esc(village)}</div><div class="row between"><b>${money(total)}</b><span class="pill">👥 ${owing.length} ယောက်</span></div></div><div class="card"><div class="sectionTitle">ဖောက်သည်များ</div><div class="list customerListCompact">${members.length?members.map(c=>`<div class="card compactCustomer customer" data-vcustomer="${esc(c.id)}"><div class="row between"><div><b>${esc(c.name)}</b><div class="muted">📞 ${esc(c.phone||"ဖုန်းမရှိ")}</div></div><b class="${balance(c)>0?"negative":"zero"}">${money(balance(c))}</b></div></div>`).join(""):'<div class="empty">ဖောက်သည်မရှိပါ</div>'}</div></div>`;
+  document.querySelectorAll("[data-vcustomer]").forEach(el=>el.onclick=()=>{view={page:"customer",customerId:el.dataset.vcustomer};render()});
+}
+function formatSaleProduct(x){
+  if(x && typeof x==="object") {
+    const product=String(x.product||"").trim(), variant=String(x.variant||"").trim(), qty=Number(x.quantity)||0;
+    if(!product)return "";
+    return `${esc(product)}${variant?` — ${esc(variant)}`:""}${qty>0?` × ${qty}`:""}`;
+  }
+  return esc(String(x??""));
+}
+function recordCard(r,actions=false){
+  const c=state.customers.find(x=>x.id===r.customerId),t=recordType(r);
+  const actionHtml=actions?`<div class="row recordActions"><button class="btn light" data-edit-rec="${esc(r.id)}">✏️ Edit</button><button class="btn danger" data-del-rec="${esc(r.id)}">🗑️ Delete</button></div>`:"";
+  const productItems=Array.isArray(r.products)?r.products.map(formatSaleProduct).filter(Boolean):[];
+  const productsHtml=productItems.length?`<div class="recordLine productLine">📦 ပစ္စည်း — ${productItems.join(" · ")}</div>`:"";
+  const notesHtml=r.notes?.length?`<div class="recordLine noteLine">📝 Note — ${r.notes.map(esc).join(" · ")}</div>`:(r.note?`<div class="recordLine noteLine">📝 Note — ${esc(r.note)}</div>`:"");
+  if(isRepayment(r)){
+    const ctx=paymentContext(c,r);
+    return `<div class="card record totalPayRecord"><div class="row between"><span class="typeBadge totalPayBadge">🔵 စုစုပေါင်းသင့်ငွေ</span><span class="muted">📅 ${esc(r.dateLabel||labelDate(r.date))}</span></div><div class="row between"><b>${esc(r.customerName)}</b><span class="pill">${esc(r.repaymentId||"PAY")}</span></div><div class="recordGrid"><div class="kv">ဆပ်မည့်အချိန် စုစုပေါင်း<b>${money(ctx.before)}</b></div><div class="kv">🟠 အကြွေးဆပ်ငွေ<b>${money(repaymentAmount(r))}</b></div></div><div style="margin-top:3px;font-size:14px">ကျန်ငွေ — <b class="${ctx.after>0?"negative":"successText"}">${ctx.after>0?money(ctx.after):"ကျန်ငွေမရှိတော့ပါ"}</b></div>${productsHtml}${notesHtml}${actionHtml}</div>`;
+  }
+  const outstanding=debtOutstanding(c,r);
+  return `<div class="card record debtRecord"><div class="row between"><span class="typeBadge debtBadge">🔴 ရောင်းကြွေး</span><span class="muted">📅 ${esc(r.dateLabel||labelDate(r.date))}</span></div><div class="row between"><b>${esc(r.customerName)}</b><span class="pill">${esc(r.saleId||"ID")}</span></div><div class="recordGrid"><div class="kv">စုစုပေါင်းသင့်ငွေ<b>${money(saleAmount(r))}</b></div><div class="kv">လက်ငင်းပေးငွေ<b>${immediatePaid(r)?money(immediatePaid(r)):"မရှိ"}</b></div></div><div style="margin-top:3px;font-size:12px">ရောင်းကြွေး — <b class="${outstanding>0?"negative":"successText"}">${outstanding>0?money(outstanding):"ရှင်းပြီး"}</b></div>${productsHtml}${notesHtml}${actionHtml}</div>`;
+}
+
+function specialAmount(c,kind){return kind==="extraList"?Number(c.extraNoteAmount||0):Number(c.creditNote||0)}
+function renderSpecialVillages(kind){
+  const title=kind==="extraList"?"ပိုငွေ":"ကျန်ငွေ";
+  const villages=[...new Set(state.customers.map(c=>String(c.village||"").trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+  const rows=villages.map(v=>{const members=state.customers.filter(c=>String(c.village||"").trim()===v&&specialAmount(c,kind)>0);return {v,members,total:members.reduce((a,c)=>a+specialAmount(c,kind),0)}}).filter(x=>x.members.length);
+  const all=state.customers.filter(c=>specialAmount(c,kind)>0), total=all.reduce((a,c)=>a+specialAmount(c,kind),0);
+  const icon=kind==="extraList"?"🟢":"🟡";
+  $("title").textContent=title;
+  $("main").innerHTML=`<div class="card" style="border-top:4px solid ${kind==="extraList"?"#16a34a":"#d97706"}"><div class="iconTitle"><span class="iconCircle">${icon}</span><div><b>${title}</b><div class="muted">စုစုပေါင်း ${money(total)} · ${all.length} ယောက်</div></div></div></div><div class="card"><div class="row between"><b>📍 ရွာအလိုက်</b><span class="muted">ရွာကိုနှိပ်ပြီး ဖောက်သည်များကြည့်ရန်</span></div></div><div class="list">${rows.length?rows.map(x=>`<div class="card compactCustomer" data-special-village="${esc(x.v)}" style="cursor:pointer"><div class="row between"><div><b>📍 ${esc(x.v)}</b><div class="muted">${x.members.length} ယောက်</div></div><b class="${kind==="extraList"?"successText":"creditText"}">${money(x.total)}</b></div></div>`).join(""):'<div class="card empty">ဒီအမျိုးအစားရှိတဲ့ ဖောက်သည်မရှိပါ</div>'}</div>`;
+  document.querySelectorAll("[data-special-village]").forEach(el=>el.onclick=()=>{view={page:"specialCustomers",specialKind:kind,specialVillage:el.dataset.specialVillage};render()});
+}
+function renderSpecialCustomers(kind,village){
+  const title=kind==="extraList"?"ပိုငွေ":"ကျန်ငွေ", icon=kind==="extraList"?"🟢":"🟡";
+  const members=state.customers.filter(c=>specialAmount(c,kind)>0&&(!village||String(c.village||"").trim()===String(village).trim())).sort((a,b)=>specialAmount(b,kind)-specialAmount(a,kind));
+  const total=members.reduce((a,c)=>a+specialAmount(c,kind),0);
+  $("title").textContent=title;
+  $("main").innerHTML=`<div class="card" style="border-top:4px solid ${kind==="extraList"?"#16a34a":"#d97706"}"><div class="iconTitle"><span class="iconCircle">${icon}</span><div><b>${title}${village?" — "+esc(village):""}</b><div class="muted">${members.length} ယောက် · စုစုပေါင်း ${money(total)}</div></div></div></div><div class="list customerListCompact">${members.length?members.map(c=>`<div class="card compactCustomer customer" data-special-customer="${esc(c.id)}"><div class="row between"><div><b>${esc(c.name)}</b><div class="muted">📞 ${esc(c.phone||"ဖုန်းမရှိ")} · 📍 ${esc(c.village||"ရွာမသတ်မှတ်ရသေး")}</div></div><b class="${kind==="extraList"?"successText":"creditText"}">${money(specialAmount(c,kind))}</b></div></div>`).join(""):'<div class="card empty">ဒီအမျိုးအစားရှိတဲ့ ဖောက်သည်မရှိပါ</div>'}</div>`;
+  document.querySelectorAll("[data-special-customer]").forEach(el=>el.onclick=()=>{view={page:"customer",customerId:el.dataset.specialCustomer,recordId:null};render()});
+}
+function renderRecords(){$("title").textContent="မှတ်တမ်း";const all=activeRecords().sort((a,b)=>new Date(b.date)-new Date(a.date)),selected=view.recordDate||dateOnly(Date.now()),rows=view.recordDate?all.filter(r=>dateOnly(r.date)===selected):all;$("main").innerHTML=`<div class="card"><div class="iconTitle"><span class="iconCircle">📅</span><b>ရက်အလိုက် မှတ်တမ်း</b></div><div class="dayFilter"><div><label>ရက်ရွေးရန်</label><input id="recordDate" type="date" value="${selected}"></div><button class="btn light" id="allRecords">အားလုံး</button></div><div class="summaryBox">📋 ${view.recordDate?selected+" ရက်၏ ":"မှတ်တမ်းအားလုံး — "}<b>${rows.length} ခု</b></div></div><div class="list recordsCompact">${rows.length?rows.map(recordCard).join(""):'<div class="card empty">ဒီရွေးချယ်မှုမှာ မှတ်တမ်းမရှိသေးပါ</div>'}</div>`;$("recordDate").onchange=e=>{view.recordDate=e.target.value;render()};$("allRecords").onclick=()=>{view.recordDate="";render()}}
+function openModal(html){let m=$("noteModal");if(!m){m=document.createElement("div");m.id="noteModal";m.style.cssText="position:fixed;inset:0;background:#0008;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px";document.body.appendChild(m)}m.innerHTML=`<div style="width:min(520px,100%);background:#f8fafc;border-radius:16px;padding:8px">${html}</div>`;m.style.display="flex"}
+function closeModal(){const m=$("noteModal");if(m)m.style.display="none"}
+function renderCustomer(){
+  const c=getC();if(!c){navPage("home");return}
+  const bal=balance(c), sales=[...c.records].filter(isSale).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const debtNote=Number(c.debtNote||0), creditNote=Number(c.creditNote||0), extraNote=Number(c.extraNoteAmount||0);
+  $("title").textContent=c.name;
+  $("main").innerHTML=`
+  <div class="card">
+    <div class="row between"><div><b>${esc(c.name)}</b><div class="muted">📞 ${esc(c.phone||"ဖုန်းမရှိ")} · 📍 ${esc(c.village||"ရွာမသတ်မှတ်ရသေး")}</div></div><div class="balance ${bal>0?"negative":"zero"}">${money(bal)}</div></div>
+    <div class="row" style="margin-top:8px"><button class="btn light" id="editCustomer">✏️ Edit</button><button class="btn danger" id="deleteCustomer">🗑️ ဖောက်သည်ဖျက်</button></div>
+  </div>
+  <div class="grid">
+    <div class="card" style="border-top:4px solid #d97706"><div class="row between"><div><b>🟡 ကျန်ငွေ</b><div class="muted">ကိုယ်တိုင် Note မှတ်ရန်</div></div><b>${money(creditNote)}</b></div><button class="btn light" style="width:100%;margin-top:8px" id="editCreditNote">✏️ Add / Note</button></div>
+    <div class="card" style="border-top:4px solid #16a34a"><div class="row between"><div><b>🟢 ပိုငွေ</b><div class="muted">ကိုယ်တိုင် Note မှတ်ရန်</div></div><b class="successText">${money(extraNote)}</b></div><button class="btn light" style="width:100%;margin-top:8px" id="editExtraNote">✏️ Add / Note</button></div>
+  </div>
+  <div class="card"><div class="row between"><div><b>🛒 ရောင်းမှတ်တမ်း</b><div class="muted">ရောင်းလိုက်တဲ့ အကြွေးပမာဏကို အပေါ်က 🔴 အကြွေးမှာ အလိုအလျောက်ပေါင်းပေးမယ်</div></div><button class="btn primary" id="addDebt">＋ ရောင်းမယ်</button></div><div class="list customerListCompact" style="margin-top:6px">${sales.length?sales.map(r=>recordCard({...r,customerId:c.id,customerName:c.name,village:c.village},true)).join(""):'<div class="empty">ရောင်းမှတ်တမ်း မရှိသေးပါ</div>'}</div></div>`;
+  $("editCustomer").onclick=()=>{view={page:"customerForm",customerId:c.id};render()};
+  $("deleteCustomer").onclick=async()=>{if(confirm("ဒီဖောက်သည်နဲ့ သူ့မှတ်တမ်းအားလုံးကို ဖျက်မလား?")){state.customers=state.customers.filter(x=>x.id!==c.id);state.deletedCustomers=Array.isArray(state.deletedCustomers)?state.deletedCustomers:[];state.deletedCustomers.push({trashId:uid(),customerId:c.id,customer:c,deletedAt:nowISO()});if(await save()){toast("ဖောက်သည်ကို Recycle Bin ထဲ ရွှေ့ပြီးပါပြီ");navPage("home")}}};
+  $("addDebt").onclick=()=>{view={page:"recordForm",customerId:c.id,recordId:null};render()};
+  $("editCreditNote").onclick=()=>editSimpleNote(c,"creditNote","🟡 ကျန်ငွေ");
+  $("editExtraNote").onclick=()=>editSimpleNote(c,"extraNoteAmount","🟢 ပိုငွေ");
+  document.querySelectorAll("[data-edit-rec]").forEach(el=>el.onclick=()=>{const rr=c.records.find(r=>r.id===el.dataset.editRec);if(!rr)return;view={page:"recordForm",customerId:c.id,recordId:rr.id};render()});
+  document.querySelectorAll("[data-del-rec]").forEach(el=>el.onclick=async()=>{const rr=c.records.find(x=>x.id===el.dataset.delRec);if(!rr)return;if(confirm("ဒီမှတ်တမ်းကို Recycle Bin ထဲ ပို့မလား?")){if(isSale(rr))c.debtNote=Math.max(0,Number(c.debtNote||0)-debtOutstanding(c,rr));c.records=c.records.filter(x=>x.id!==rr.id);state.deletedRecords.push({trashId:uid(),customerId:c.id,record:rr,deletedAt:nowISO()});if(await save()){toast("Recycle Bin ထဲ ရွှေ့ပြီးပါပြီ");render()}}});
+}
+function editSimpleNote(c,key,title){
+  const current=Number(c[key]||0), noteKey=key+"Note";
+  openNoteModal(title,current,c[noteKey]||"",async(amount,note)=>{c[key]=amount;c[noteKey]=note;if(await save()){toast("Note သိမ်းပြီးပါပြီ");closeModal();render()}});
+}
+function openNoteModal(title,amount,note,onSave){
+  const box=document.createElement("div");box.innerHTML=`<div class="card" style="margin:0"><h3 style="margin-top:0">${esc(title)}</h3><label>💰 ပမာဏ</label><input id="noteAmount" type="number" min="0" value="${Number(amount)||0}"><label>📝 Note</label><textarea id="noteText" placeholder="Note မှတ်ရန်">${esc(note||"")}</textarea><div class="form-actions"><button class="btn light" id="noteCancel">မလုပ်တော့</button><button class="btn primary" id="noteSave">💾 သိမ်းမယ်</button></div></div>`;
+  openModal(box.innerHTML);$("noteCancel").onclick=closeModal;$("noteSave").onclick=()=>onSave(Math.max(0,Number($("noteAmount").value)||0),$("noteText").value.trim());
+}
+
+function renderCustomerForm(){const c=getC();$("title").textContent=c?"ဖောက်သည် Edit":"ဖောက်သည်အသစ်";$("main").innerHTML=`<div class="card"><label>👤 ဖောက်သည်အမည်</label><input id="cname" value="${esc(c?.name||"")}" placeholder="အမည်"><label>📞 ဖုန်းနံပါတ်</label><input id="cphone" value="${esc(c?.phone||"")}" placeholder="ဖုန်းနံပါတ်"><label>📍 ရွာ</label><select id="cvillage">${villageOptions(c?.village||"")}</select><div class="form-actions"><button class="btn light" id="cancelC">မလုပ်တော့</button><button class="btn primary" id="saveC">💾 သိမ်းမယ်</button></div></div>`;$("cancelC").onclick=()=>{if(c){view={page:"customer",customerId:c.id};render()}else navPage("home")};$("saveC").onclick=async()=>{const name=$("cname").value.trim();if(!name)return toast("ဖောက်သည်အမည် ထည့်ပါ");const duplicate=state.customers.some(x=>x.id!==(c?.id||"")&&norm(x.name)===norm(name));if(duplicate)return toast("ဒီဖောက်သည်အမည် ရှိပြီးသားပါ");const data={name,phone:$("cphone").value.trim(),village:$("cvillage").value};if(c)Object.assign(c,data,{updatedAt:nowISO()});else {const nc={id:uid(),...data,updatedAt:nowISO(),extraNote:"",creditNote:0,creditNoteNote:"",extraNoteAmount:0,extraNoteAmountNote:"",debtNote:0,debtNoteNote:"",records:[]};if(state.customerSortMode==="newest")state.customers.unshift(nc);else state.customers.push(nc);}if(await save()){toast("သိမ်းပြီးပါပြီ");setTimeout(()=>{if(c){view={page:"customer",customerId:c.id};render()}else navPage("home")},150)}}}
+function lineInputs(kind,items){return `<div class="lineList" id="${kind}Lines">${(items?.length?items:[""]).map((v,i)=>`<div class="lineRow"><input data-${kind} value="${esc(v)}" placeholder="${kind==="product"?"ပစ္စည်း":"Note"} ${i+1}"></div>`).join("")}</div><button type="button" class="lineAdd" data-add-line="${kind}">＋ Add ${kind==="product"?"ပစ္စည်း":"Note"} မျဉ်းကြောင်း</button>`}
+function addLine(kind){const wrap=$(kind+"Lines");const div=document.createElement("div");div.className="lineRow";div.innerHTML=`<input data-${kind} placeholder="${kind==="product"?"ပစ္စည်း":"Note"} ${wrap.children.length+1}">`;wrap.appendChild(div)}
+function productMenuData(){
+  return Array.isArray(state.productMenu)?state.productMenu:[];
+}
+function renderProductMenuPage(){
+  const items=productMenuData();
+  $("title").textContent="ပစ္စည်းမီနူး";
+  $("main").innerHTML=`<div class="card"><div class="sectionTitle">📦 ရောင်းမယ့် ပစ္စည်း / အမျိုးအစား မီနူး</div><div class="muted">ဒီနေရာမှာ ကိုယ်တိုင်သတ်မှတ်ထားပါ။ ရောင်းတဲ့နေရာရောက်ရင် ရွေးချယ်စရာအဖြစ် Auto ပေါ်လာပါမယ်။</div><label>ပစ္စည်းအမည်</label><input id="pmProduct" placeholder="ဥပမာ - Coca Cola"><label>အမျိုးအစား</label><input id="pmVariant" placeholder="ဥပမာ - 500ml"><button class="btn primary" id="pmAdd" style="width:100%;margin-top:10px">＋ မီနူးထည့်မယ်</button></div><div class="list">${items.length?items.map((it,i)=>`<div class="card"><div class="row between"><div><b>📦 ${esc(it.product)}</b><div class="muted" style="margin-top:4px">အမျိုးအစား — ${esc(it.variant||"အမျိုးအစားမသတ်မှတ်")}</div></div><button class="btn danger" data-pm-del="${i}">ဖျက်</button></div></div>`).join(""):'<div class="card empty">မီနူးမရှိသေးပါ။ အပေါ်မှာ ပစ္စည်းနဲ့ အမျိုးအစားထည့်ပါ။</div>'}</div>`;
+  $("pmAdd").onclick=async()=>{
+    const product=$("pmProduct").value.trim(),variant=$("pmVariant").value.trim();
+    if(!product)return toast("ပစ္စည်းအမည် ထည့်ပါ");
+    if(!variant)return toast("အမျိုးအစား ထည့်ပါ");
+    const dup=items.some(x=>norm(x.product)===norm(product)&&norm(x.variant)===norm(variant));
+    if(dup)return toast("ဒီပစ္စည်း / အမျိုးအစား ရှိပြီးသားပါ");
+    items.push({id:uid(),product,variant});
+    state.productMenu=items;
+    if(await save()){toast("မီနူးထည့်ပြီးပါပြီ");render()}
+  };
+  document.querySelectorAll("[data-pm-del]").forEach(el=>el.onclick=async()=>{
+    const i=Number(el.dataset.pmDel); if(!Number.isInteger(i)||!items[i])return;
+    if(!confirm(`${items[i].product} / ${items[i].variant} ကို မီနူးထဲက ဖျက်မလား?`))return;
+    items.splice(i,1); state.productMenu=items;
+    if(await save()){toast("မီနူးဖျက်ပြီးပါပြီ");render()}
+  });
+}
+function saleProductOptions(selected=""){
+  const items=productMenuData();
+  const products=[...new Map(items.map(x=>[norm(x.product),String(x.product)])).values()];
+  const cur=String(selected||"");
+  return `<option value="">ပစ္စည်းရွေးရန်</option>`+products.map(v=>`<option value="${esc(v)}" ${v===cur?"selected":""}>${esc(v)}</option>`).join("");
+}
+function saleVariantOptions(product,selected=""){
+  const items=productMenuData().filter(x=>norm(x.product)===norm(product));
+  const cur=String(selected||"");
+  return `<option value="">အမျိုးအစားရွေးရန်</option>`+items.map(x=>`<option value="${esc(x.variant)}" ${String(x.variant)===cur?"selected":""}>${esc(x.variant)}</option>`).join("");
+}
+function refreshSaleVariants(i,selected=""){
+  const row=document.querySelector(`.sale-item[data-i="${i}"]`); if(!row)return;
+  const product=row.querySelector(".sale-product")?.value||"", v=row.querySelector(".sale-variant");
+  if(v)v.innerHTML=saleVariantOptions(product,selected);
+}
+function saleItemTemplate(i,x={}){
+  const product=String(x.product||""),variant=String(x.variant||""),qty=Math.max(1,parseInt(x.quantity,10)||1);
+  return `<div class="sale-item card" data-i="${i}" style="margin-bottom:8px;padding:10px"><div class="row between"><b>ပစ္စည်း ${i+1}</b>${i>0?`<button type="button" class="btn danger" onclick="removeSaleItem(${i})">ဖယ်မယ်</button>`:""}</div><label>📦 ပစ္စည်း</label><select class="sale-product" onchange="changeSaleProduct(${i})">${saleProductOptions(product)}</select><label>🔹 အမျိုးအစား</label><select class="sale-variant">${saleVariantOptions(product,variant)}</select><label>🔢 အရေအတွက်</label><input class="sale-qty" type="number" min="1" step="1" value="${qty}" placeholder="1"></div>`;
+}
+function renderSaleItems(){
+  const wrap=$("saleItems"),items=[...document.querySelectorAll(".sale-item")].map((r,i)=>({product:r.querySelector(".sale-product")?.value||"",variant:r.querySelector(".sale-variant")?.value||"",quantity:r.querySelector(".sale-qty")?.value||1}));
+  wrap.innerHTML=items.map((x,i)=>saleItemTemplate(i,x)).join("");
+}
+function addSaleItem(){
+  const wrap=$("saleItems"),i=wrap.querySelectorAll(".sale-item").length;
+  wrap.insertAdjacentHTML("beforeend",saleItemTemplate(i));
+}
+function removeSaleItem(i){
+  const row=document.querySelector(`.sale-item[data-i="${i}"]`); if(row)row.remove();
+  document.querySelectorAll("#saleItems .sale-item").forEach((el,n)=>{el.dataset.i=n;const t=el.querySelector("b");if(t)t.textContent=`ပစ္စည်း ${n+1}`;const b=el.querySelector("[onclick^='removeSaleItem']");if(b)b.setAttribute("onclick",`removeSaleItem(${n})`)});
+}
+function changeSaleProduct(i){refreshSaleVariants(i,"");}
+function renderRecordForm(){
+  const c=getC();if(!c){navPage("home");return}
+  const r=c.records.find(x=>x.id===view.recordId&&isSale(x)),products=r?.products||[],notes=r?.notes||(r?.note?[r.note]:[]),saleId=r?.saleId||nextSaleId(c),saleTotal=r?.saleTotal??r?.debt??"",paid=r?.immediatePaid??r?.paid??"";
+  $("title").textContent=r?"အရောင်းအကြွေး Edit":"အရောင်းအကြွေးအသစ်";
+  const saleRows=products.length?products:[{product:"",variant:"",quantity:1}];
+  $("main").innerHTML=`<div class="card"><div class="summaryBox" style="margin-top:0"><div class="row between"><b>🔴 ရောင်းကြွေး</b><b>${esc(saleId)}</b></div><div class="muted" style="margin-top:3px">ပစ္စည်းမီနူးထဲမှာ ကြိုသတ်မှတ်ထားတာတွေကို ရွေးနိုင်ပါတယ်။</div></div><label>💰 စုစုပေါင်းသင့်ငွေ</label><input id="debt" type="number" min="0" value="${saleTotal}" placeholder="2200"><label>🟢 လက်ငင်းပေးငွေ</label><input id="paid" type="number" min="0" value="${paid}" placeholder="မရှိရင် 0"><div class="recordGrid"><div class="kv">ရောင်းကြွေး<b id="saleOutstandingPreview">${money(Math.max(0,(Number(saleTotal)||0)-(Number(paid)||0)))}</b></div><div class="kv">ID<b>${esc(saleId)}</b></div></div><label>📅 ရက် / လ / နှစ် / အချိန်</label><input id="rdt" type="datetime-local" value="${localInput(r?.date||Date.now())}"><div class="muted" id="day" style="margin-top:4px"></div><label>📦 ရောင်းမယ့် ပစ္စည်း</label><div id="saleItems">${saleRows.map((x,i)=>saleItemTemplate(i,x)).join("")}</div><button type="button" class="lineAdd" id="addSaleItem">＋ ပစ္စည်းထပ်ထည့်မယ်</button><label>📝 Note</label><div class="lineList" id="noteLines">${(notes.length?notes:[""]).map((v,i)=>`<div class="lineRow"><input data-note value="${esc(v)}" placeholder="Note ${i+1}"></div>`).join("")}</div><button type="button" class="lineAdd" data-add-line="note">＋ Note မျဉ်းကြောင်းထည့်မယ်</button><div class="form-actions"><button class="btn light" id="cancelR">မလုပ်တော့</button><button class="btn primary" id="saveR">💾 သိမ်းမယ်</button></div></div>`;
+  const update=()=>{$("day").textContent=dayName($("rdt").value);$("saleOutstandingPreview").textContent=money(Math.max(0,(Number($("debt").value)||0)-(Number($("paid").value)||0)))};update();$("rdt").onchange=update;$("debt").oninput=update;$("paid").oninput=update;
+  $("addSaleItem").onclick=addSaleItem;
+  document.querySelectorAll("[data-add-line]").forEach(b=>b.onclick=()=>addLine(b.dataset.addLine));
+  $("cancelR").onclick=()=>{view={page:"customer",customerId:c.id};render()};
+  $("saveR").onclick=async()=>{
+    const total=Number($("debt").value)||0,immediate=Number($("paid").value)||0,date=$("rdt").value;
+    if(total<=0)return toast("စုစုပေါင်းသင့်ငွေ ထည့်ပါ");if(immediate<0||immediate>total)return toast("လက်ငင်းပေးငွေကို စုစုပေါင်းသင့်ငွေထက် မပိုရပါ");if(!date)return toast("ရက်/အချိန် ထည့်ပါ");
+    const rows=[...document.querySelectorAll("#saleItems .sale-item")];
+    const products=rows.map(row=>({product:(row.querySelector(".sale-product")?.value||"").trim(),variant:(row.querySelector(".sale-variant")?.value||"").trim(),quantity:parseInt(row.querySelector(".sale-qty")?.value,10)||0}));
+    if(!products.length||products.some(x=>!x.product||!x.variant||!Number.isInteger(x.quantity)||x.quantity<1))return toast("ပစ္စည်း၊ အမျိုးအစားနဲ့ အရေအတွက်ကို မှန်ကန်စွာ ဖြည့်ပါ");
+    const notes=[...document.querySelectorAll("[data-note]")].map(x=>x.value.trim()).filter(Boolean),saleDebt=Math.max(0,total-immediate),oldSaleDebt=r?Math.max(0,saleAmount(r)-immediatePaid(r)):0;
+    const obj={id:r?.id||uid(),type:"sale",updatedAt:nowISO(),saleId,saleTotal:total,immediatePaid:immediate,debt:total,paid:immediate,date:new Date(date).toISOString(),dateLabel:labelDate(date),products,notes,note:notes.join(" · ")};
+    if(r){Object.assign(r,obj);c.debtNote=Math.max(0,Number(c.debtNote||0)-oldSaleDebt+saleDebt)}else{c.records.push(obj);c.debtNote=Math.max(0,Number(c.debtNote||0)+saleDebt)}
+    if(await save()){toast(r?"အရောင်းအကြွေး ပြင်ပြီးပါပြီ":"အရောင်းအကြွေး သိမ်းပြီးပါပြီ");setTimeout(()=>{view={page:"customer",customerId:c.id};render()},150)}
+  };
+}
+
+function renderPaymentForm(){
+  const c=getC();if(!c){navPage("home");return}
+  const r=c.records.find(x=>x.id===view.recordId&&isRepayment(x)),isEdit=!!r,currentBalance=isEdit?Math.max(0,balance(c)+repaymentAmount(r)):balance(c),initialAmount=isEdit?repaymentAmount(r):"";
+  $('title').textContent=isEdit?"အကြွေးဆပ် Edit":"အကြွေးဆပ်";
+  $('main').innerHTML=`<div class="card"><div class="summaryBox" style="margin-top:0;background:#eff6ff"><div class="row between"><b>🔵 စုစုပေါင်းသင့်ငွေ</b><b class="negative">${money(currentBalance)}</b></div><div class="muted" style="margin-top:3px">အရင်အရောင်း ID တွေကို ရွေးစရာမလိုပါ။ လက်ရှိစုစုပေါင်းအကြွေးထဲက ကိုယ်တိုင်ဆပ်မယ့်ပမာဏကို ထည့်ပါ။</div></div><label>🟠 အကြွေးဆပ်ငွေ</label><input id="payAmount" type="number" min="1" max="${Math.max(1,currentBalance)}" value="${initialAmount}" placeholder="3000"><div class="recordGrid"><div class="kv">မဆပ်ခင်<b>${money(currentBalance)}</b></div><div class="kv">ကျန်ငွေ<b id="payRemain">${money(Math.max(0,currentBalance-(Number(initialAmount)||0)))}</b></div></div><label>📅 ရက် / လ / နှစ် / အချိန်</label><input id="pdt" type="datetime-local" value="${localInput(r?.date||Date.now())}"><label>📝 Note</label><textarea id="pnote" placeholder="အကြွေးဆပ်ငွေ Note">${esc(r?.note||"")}</textarea><div class="form-actions"><button class="btn light" id="cancelP">မလုပ်တော့</button><button class="btn primary" id="saveP">💾 ${isEdit?"ပြင်ဆင်ပြီးသိမ်းမယ်":"အကြွေးဆပ်မှတ်တမ်းသိမ်းမယ်"}</button></div></div>`;
+  const refreshRemain=()=>{$('payRemain').textContent=money(Math.max(0,currentBalance-(Number($('payAmount').value)||0)))};$('payAmount').oninput=refreshRemain;
+  $('cancelP').onclick=()=>{view={page:"customer",customerId:c.id};render()};
+  $('saveP').onclick=async()=>{const amount=Number($('payAmount').value)||0,date=$('pdt').value;if(amount<=0)return toast("အကြွေးဆပ်ငွေ ထည့်ပါ");if(amount>currentBalance)return toast("လက်ရှိစုစုပေါင်းအကြွေးထက် ပိုမပေးရပါ");if(!date)return toast("ရက်/အချိန် ထည့်ပါ");const notes=$('pnote').value.trim(),before=currentBalance,after=Math.max(0,before-amount),out=allocatePayment(c,amount,isEdit?r.id:null),obj={id:r?.id||uid(),type:"repayment",updatedAt:nowISO(),repaymentId:r?.repaymentId||nextRepaymentId(c),paid:amount,repaymentAmount:amount,debtBefore:before,debtAfter:after,allocations:out.allocations,unapplied:out.unapplied||0,date:new Date(date).toISOString(),dateLabel:labelDate(date),products:[],notes:notes?[notes]:[],note:notes};if(r)Object.assign(r,obj);else c.records.push(obj);if(await save()){toast(isEdit?"အကြွေးဆပ်မှတ်တမ်း ပြင်ပြီးပါပြီ":"အကြွေးဆပ်မှတ်တမ်း သိမ်းပြီးပါပြီ");setTimeout(()=>{view={page:"customer",customerId:c.id};render()},150)}}
+}
+
+function renderTrash(){
+  $("title").textContent="Recycle Bin";
+  const dc=Array.isArray(state.deletedCustomers)?state.deletedCustomers:[],dr=Array.isArray(state.deletedRecords)?state.deletedRecords:[];
+  $("main").innerHTML=`<div class="card"><div class="iconTitle"><span class="iconCircle">🗑️</span><b>ဖျက်ထားသော Data</b></div><div class="muted" style="margin-top:7px">Customer နဲ့ မှတ်တမ်းတွေကို သီးခြား Restore ပြန်လုပ်နိုင်ပါတယ်။</div></div><div class="list">${dc.length?dc.slice().reverse().map(x=>`<div class="card"><b>👤 ${esc(x.customer?.name||"အမည်မရှိ")}</b><div class="muted">Customer · ${esc(x.customer?.phone||"")}</div><div class="row" style="margin-top:9px"><button class="btn success" data-restore-customer="${esc(x.trashId)}">♻️ Customer Restore</button><button class="btn danger" data-permanent-customer="${esc(x.trashId)}">🗑️ အပြီးဖျက်</button></div></div>`).join(""):""}${dr.length?dr.slice().reverse().map(x=>{const c=state.customers.find(c=>c.id===x.customerId);return `<div class="card"><div class="row between"><div><b>${esc(c?.name||"ဖောက်သည်မရှိတော့ပါ")}</b><div class="muted">${esc(x.record.dateLabel||labelDate(x.record.date))}</div></div><b>${money(isRepayment(x.record)?x.record.paid:x.record.debt)}</b></div><div class="muted" style="margin-top:6px">${isRepayment(x.record)?"🔵 အကြွေးဆပ်မှတ်တမ်း":"🔴 ရောင်းကြွေး"}</div><div class="row" style="margin-top:9px"><button class="btn success" data-restore="${esc(x.trashId)}">♻️ Restore</button><button class="btn danger" data-permanent="${esc(x.trashId)}">🗑️ အပြီးဖျက်</button></div></div>`}).join(""):""}${!dc.length&&!dr.length?'<div class="card empty">Recycle Bin ထဲမှာ Data မရှိပါ</div>':''}</div>`;
+  document.querySelectorAll("[data-restore-customer]").forEach(el=>el.onclick=async()=>{const i=dc.findIndex(x=>x.trashId===el.dataset.restoreCustomer);if(i<0)return;const item=dc[i];if(state.customers.some(x=>x.id===item.customer.id))return toast("ဒီ Customer ID ရှိပြီးသားပါ");state.customers.push(item.customer);state.deletedCustomers.splice(i,1);if(await save()){toast("Customer Restore လုပ်ပြီးပါပြီ");render()}});
+  document.querySelectorAll("[data-permanent-customer]").forEach(el=>el.onclick=async()=>{if(confirm("ဒီ Customer ကို အပြီးဖျက်မလား? ပြန်ယူလို့မရတော့ပါ။")){state.deletedCustomers=dc.filter(x=>x.trashId!==el.dataset.permanentCustomer);if(await save()){toast("Customer အပြီးဖျက်ပြီးပါပြီ");render()}}});
+  document.querySelectorAll("[data-restore]").forEach(el=>el.onclick=async()=>{const i=dr.findIndex(x=>x.trashId===el.dataset.restore);if(i<0)return;const item=dr[i],c=state.customers.find(c=>c.id===item.customerId);if(!c)return toast("ဖောက်သည်မရှိတော့လို့ Restore မလုပ်နိုင်ပါ");c.records.push(item.record);state.deletedRecords.splice(i,1);if(await save()){toast("မှတ်တမ်း Restore လုပ်ပြီးပါပြီ");render()}});
+  document.querySelectorAll("[data-permanent]").forEach(el=>el.onclick=async()=>{if(confirm("ဒီမှတ်တမ်းကို အပြီးဖျက်မလား? ပြန်ယူလို့မရတော့ပါ။")){state.deletedRecords=dr.filter(x=>x.trashId!==el.dataset.permanent);if(await save()){toast("အပြီးဖျက်ပြီးပါပြီ");render()}}})
+}
+
+function cloudPayloadSizeBytes(){try{return new TextEncoder().encode(JSON.stringify(normalizeState(state))).byteLength}catch(e){return 0}}
+function cloudCapacityWarning(){const b=cloudPayloadSizeBytes();if(!b)return "";if(b>=900000)return `⚠️ Cloud Data ${Math.round(b/1024)} KB — Cloud limit နီးနေပါပြီ`;if(b>=700000)return `🟠 Cloud Data ${Math.round(b/1024)} KB — အရွယ်အစား စောင့်ကြည့်ပါ`;return `☁️ Cloud Data ${Math.round(b/1024)} KB`}
+function downloadBackup(){
+  try{
+    const raw=JSON.stringify(normalizeState(state),null,2);
+    const blob=new Blob([raw],{type:"application/json;charset=utf-8"});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    a.href=url;
+    a.download="EMK_Ledger_Backup_"+new Date().toISOString().slice(0,10)+".json";
+    document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+    toast("Backup ဖိုင် ထုတ်ပြီးပါပြီ");
+  }catch(e){toast("Backup ထုတ်မရပါ");console.error(e)}
+}
+function validateBackupObject(obj){
+  if(!obj||typeof obj!=="object"||Array.isArray(obj)||!Array.isArray(obj.customers))throw new Error("Backup JSON ပုံစံမမှန်ပါ");
+  for(const c of obj.customers){if(!c||typeof c!=="object"||!Array.isArray(c.records))throw new Error("Customer data ပုံစံမမှန်ပါ")}
+  return normalizeState(obj);
+}
+async function restoreBackupObject(imported,mode){const incoming=validateBackupObject(imported);const next=mode==="merge"?mergeImportedState(state,incoming):incoming;if(!confirm(mode==="merge"?`Backup ကို လက်ရှိ Data နဲ့ Merge လုပ်မလား?\n\nBackup ထဲက Customer/Record တွေကို ထည့်ပေါင်းပေးမယ်။`:`Backup နဲ့ လက်ရှိ Data အားလုံးကို အစားထိုးမလား?`))return;state=next;if(await save()){toast(`Backup Restore ပြီးပါပြီ — Customer ${state.customers.length} ယောက်`);view={page:"home",customerId:null,recordId:null,recordDate:""};render();return true}return false}
+function openBackupRestore(){const input=document.createElement("input");input.type="file";input.accept=".json,application/json";input.style.display="none";document.body.appendChild(input);input.onchange=async()=>{const file=input.files?.[0];input.remove();if(!file)return;try{const obj=JSON.parse(await file.text());const normalized=validateBackupObject(obj);const choice=prompt("Backup ပြန်ထည့်ရန် ရွေးပါ။\n\n1 = Replace\n2 = Merge","1");if(choice!=="1"&&choice!=="2")return toast("Restore မလုပ်တော့ပါ");await restoreBackupObject(normalized,choice==="2"?"merge":"replace")}catch(e){console.error(e);toast("Backup ဖိုင် မမှန်ပါ — Data မပြောင်းပါ")}};input.click()}
+
+async function resetAllData(){if(!confirm("Data အားလုံးကို Reset လုပ်မလား?\n\nBackup ရှိထားသင့်ပါတယ်။"))return;if(!confirm("နောက်ဆုံးအတည်ပြုချက် — EMK Ledger Data အားလုံးကို ဖျက်မယ်နော်?"))return;state={customerSortMode:state.customerSortMode||"newest",customers:[],deletedRecords:[],deletedCustomers:[],productMenu:[]};if(await save()){toast("Data Reset ပြီးပါပြီ");view={page:"home",customerId:null,recordId:null,recordDate:""};render()}}
+
+function renderMenuPage(){const extraTotal=state.customers.reduce((a,c)=>a+Number(c.extraNoteAmount||0),0),extraCount=state.customers.filter(c=>Number(c.extraNoteAmount||0)>0).length;const remainTotal=state.customers.reduce((a,c)=>a+Number(c.creditNote||0),0),remainCount=state.customers.filter(c=>Number(c.creditNote||0)>0).length;$("title").textContent="မီနူး";$("main").innerHTML=`<div class="list"><div class="grid"><div class="card" data-menu-action="extraList"><b>🟢 ပိုငွေ</b><div class="muted">${extraCount} ယောက် · စုစုပေါင်း ${money(extraTotal)}</div></div><div class="card" data-menu-action="remainingList"><b>🟡 ကျန်ငွေ</b><div class="muted">${remainCount} ယောက် · စုစုပေါင်း ${money(remainTotal)}</div></div></div><div class="card" data-menu-action="backup"><b>💾 Backup</b><div class="muted">Data ကို ဖိုင်အဖြစ် သိမ်းရန်</div></div><div class="card" data-menu-action="restoreBackup"><b>📥 Backup ပြန်ထည့်မယ်</b><div class="muted">JSON Backup ကို Restore / Merge လုပ်ရန်</div></div><div class="card" data-menu-action="reset"><b>🔄 Data Reset</b><div class="muted">Data အားလုံးကို Reset လုပ်ရန်</div></div><div class="card" data-menu-action="productMenu"><b>📦 ပစ္စည်းမီနူး</b><div class="muted">ပစ္စည်း / အမျိုးအစား ကြိုသတ်မှတ်ရန်</div></div><div class="card" data-menu-action="trash"><b>🗑️ Recycle Bin</b><div class="muted">ဖျက်ထားသောမှတ်တမ်းများ</div></div><div class="card" data-menu-action="storage"><b>💾 Data သိမ်းဆည်းမှု စစ်မယ်</b><div class="muted">Browser ထဲမှာ Data ရှိ/မရှိ စစ်ရန်</div></div></div>`;document.querySelectorAll("[data-menu-action]").forEach(el=>el.onclick=async()=>{const a=el.dataset.menuAction;if(a==="trash"){view={page:"trash"};render()}else if(a==="storage"){const ok=await load();toast(ok?"Data သိမ်းထားပါတယ်":"Data မတွေ့ပါ")}else if(a==="backup")downloadBackup();else if(a==="restoreBackup")openBackupRestore();else if(a==="reset")await resetAllData();else if(a==="productMenu"){view={page:"productMenu"};render()}else{view={page:a};render()}})}
+
+function updateSearchClear(){const b=$("clearSearch"),s=$("search");if(!b||!s)return;const show=view.page==="home"&&s.value.trim()!=="";b.classList.toggle("hidden",!show)}$("search").addEventListener("input",()=>{updateSearchClear();render()});$("clearSearch").onclick=(e)=>{e.preventDefault();e.stopPropagation();$("search").value="";updateSearchClear();render();setTimeout(()=>$("search")?.focus(),0)};function openNewCustomerForm(e){if(e){e.preventDefault();e.stopPropagation()}if(view.page!=="home")return;view={page:"customerForm",customerId:null,recordId:null,recordDate:""};render();setTimeout(()=>{$("cname")?.focus()},50)}const oldFab=$("fab");const fabBtn=oldFab.cloneNode(true);oldFab.replaceWith(fabBtn);fabBtn.addEventListener("click",openNewCustomerForm);$("backBtn").onclick=()=>{const c=getC();if(view.page==="paymentForm"||view.page==="recordForm")view={page:"customer",customerId:c?.id};else if(view.page==="customerForm")view=c?{page:"customer",customerId:c.id}:{page:"home"};else if(view.page==="customer")view={page:"home"};else if(view.page==="village")view={page:"debt"};else if(view.page==="trash"||view.page==="extraList"||view.page==="remainingList"||view.page==="productMenu")view={page:"menu"};else if(view.page==="specialCustomers")view={page:view.specialKind};else view={page:"home"};render()};document.addEventListener("click",e=>{const b=e.target.closest?.("[data-nav]");if(!b)return;e.preventDefault();e.stopPropagation();navPage(b.dataset.nav)},true);
+async function emergencySyncSave(){try{const raw=JSON.stringify(state);localStorage.setItem(KEY,raw);localStorage.setItem(BACKUP_KEY,raw)}catch(e){}}window.addEventListener("pagehide",emergencySyncSave);window.addEventListener("beforeunload",emergencySyncSave);(async()=>{const loaded=await load();render();startWiFiPolling();if(!loaded){try{const r=await wifiPut(state);wifiRevision=Number(r.revision)||0;wifiStatus("🟢 Wi-Fi: Host Data စတင်သိမ်းပြီး")}catch(e){wifiStatus("🟠 Wi-Fi Server မရသေးပါ")}}})();
+</script></body></html>
